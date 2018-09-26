@@ -1,0 +1,40 @@
+{
+  "name": "noah-system",
+  "version": "1.0.0",
+  "description": "React Native hot update management system",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "npm run dev",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": " NODE_ENV=development nodemon --watch src src/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@gitlab.com/rrd-fe/noah-system.git"
+  },
+  "keywords": [
+    "react-native",
+    "hot-update"
+  ],
+  "author": "RRD-FE",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://gitlab.com/rrd-fe/noah-system/issues"
+  },
+  "homepage": "https://gitlab.com/rrd-fe/noah-system#README",
+  "dependencies": {
+    "debug": "^4.0.1",
+    "fs-extra": "^6.0.1",
+    "leek-mysql": "^1.0.0",
+    "leek-redis": "^1.0.1",
+    "leek-session": "^1.0.1",
+    "leek-session-redis": "^1.0.1",
+    "leek-view-nunjucks": "^1.1.0",
+    "leek-views": "^1.1.1",
+    "leekjs": "0.0.13",
+    "moment": "^2.22.2",
+    "numeral": "^2.0.6",
+    "uid-safe": "^2.1.5"
+  },
+  "private": true
+}
