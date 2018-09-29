@@ -6,48 +6,62 @@
 
 const Service = leek.Service;
 
+//用户表
+const USER_TABLE = 'tb_user';
+
 class UserService extends Service{
     //查询当前userId的用户信息
-    async getUserInfo(userId){
-        let getUserSql = `SELECT id,name,role,updatedAt FROM  user WHERE id= ? limit 1`;
+    async getUserInfoById(userId){
+        let getUserSql = `SELECT * FROM  ${USER_TABLE} WHERE id= ? limit 1`;
 
         let result = await this.ctx.app.mysql.query(getUserSql,[userId]);
         return result.results[0];
 
     }
     //查询某个用户的密码
-    async findOne(userName){
+    async getUserInfoByName(userName){
         const { ctx } = this;
-        let sql = `SELECT password,id FROM  user WHERE name= ? `;
+        let sql = `SELECT * FROM  ${USER_TABLE} WHERE name= ? `;
         let result = await ctx.app.mysql.query(sql,[userName]);
         return result.results[0];
     }
-    //添加用户  //addUser',name, password,role
-    async addUser(name,password,role){
+    /**
+     * 创建用户
+     * @param {string} name 用户名
+     * @param {string} password 用户密码，加密之后的
+     * @returns {boolean} 
+     */
+    async addUser(name, password){
         const { ctx } = this;
-        let sql = `INSERT INTO user (name,password,role) VALUES ("${name}","${password}","${role}")`;
+        const sql = `INSERT INTO ${USER_TABLE} (name,pwd) VALUES (?, ?)`;
 
-        let result = await ctx.app.mysql.query(sql);
-        return result.results;
+        const result = await ctx.app.mysql.query(sql, [name, password]);
+        return result.results.insertId === 1;
     }
     //查询所有用户信息
     async getAllUser(){
-        let sql = `select id,name,role,updatedAt from  user order by createdAt desc`;
+        let sql = `select * from ${USER_TABLE} order by createdAt desc`;
         let result = await this.ctx.app.mysql.query(sql);
         return result.results;
     }
-    //更新用户
-    async updateUser(name, password, updatedAt, id){
-        let selectData = [name,updatedAt,id];
+    /**
+     * 修改用户信息
+     * @param {int} id 用户ID
+     * @param {string} name 用户名
+     * @param {string?} password 加密之后的密码
+     * @returns {boolean}
+     */
+    async updateUser(id, name, password){
+        let selectData = [name, id];
         let strData = ``
         if(password){
-            selectData = [name,password,updatedAt,id];
+            selectData = [name, password, id];
             strData = `password = ?,`;
         }
-        let sql = `UPDATE user SET name = ?, ${strData}updatedAt = ? WHERE id = ?`;
+        let sql = `UPDATE ${USER_TABLE} SET name = ?, ${strData}updatedAt = ? WHERE id = ?`;
 
         let result = await this.ctx.app.mysql.query(sql,selectData);
-        return result.results;
+        return result.results.changedRows === 1;
     }
 }
 

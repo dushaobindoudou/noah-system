@@ -1,3 +1,5 @@
+const path = require('path');
+
 module.exports = {
     "projectType": "react",
     "prefix": "",
@@ -17,10 +19,10 @@ module.exports = {
             commonJsName: '',
             commonCssName: '',
             "vendors": [
+                "core-js",
                 "react",
                 "react-dom",
                 "lodash",
-                "antd",
                 "axios",
             ],
             "css": [

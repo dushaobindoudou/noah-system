@@ -5,8 +5,6 @@
 
 'use strict';
 
-const crypto = require('crypto');
-const formidable = require('formidable');
 const USER_KEY = Symbol('user');
 
 module.exports = {
