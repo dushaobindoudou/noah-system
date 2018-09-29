@@ -8,5 +8,59 @@ module.exports = {
     "leekConfig": "./.leekConfig/",
     "leekWebpackConfigDir": "{{leekConfig}}/webpack/",
     "leekManifsetDir": "{{leekConfig}}/manifest/",
-    "configIn": "client"
+    "configIn": "client",
+    "client": {
+        "assetsDir": "./assets/",
+        "vendorDir": "vendor/",
+        "sourceDir": "./src",
+        "dll": {
+            commonJsName: '',
+            commonCssName: '',
+            "vendors": [
+                "react",
+                "react-dom",
+                "lodash",
+                "antd",
+                "axios",
+            ],
+            "css": [
+                path.resolve(__dirname, './src/common/static/css/base.scss')
+            ],
+            sassIncludePaths: [
+                path.resolve(__dirname, './src/'),
+            ],
+            resolve: {},
+            module: {},
+            plugins: [],
+        },
+        "common": {
+            template: ' ',
+            resolve: {
+            },
+            sassIncludePaths: [
+                path.resolve(__dirname, './src/'),
+            ],
+            module: {},
+            plugins: [],
+        },
+        'base': {
+            template: '',
+            watchOptions: {},
+            resolve: {},
+            sassIncludePaths: [
+                path.resolve(__dirname, './src/'),
+            ],
+            module: {
+            },
+            plugins: [],
+        },
+    },
+    "server": {
+        "relPath": "../../",
+        "contentPath": [
+            "src/#",
+            "package.json"
+        ],
+
+    }
 }
