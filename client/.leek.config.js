@@ -25,6 +25,10 @@ module.exports = {
                 "lodash",
                 "axios",
                 "antd",
+                "history",
+                "react-router-dom",
+                "mobx",
+                "mobx-react",
             ],
             "css": [
                 path.resolve(__dirname, './src/common/static/css/base.scss')

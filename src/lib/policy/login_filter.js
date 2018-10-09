@@ -22,7 +22,7 @@ class LoginPolicy extends leek.Policy{
                 const session = ctx.session;
                 const loginJumpUrl = ctx.originalUrl || '/';
                 session.loginJump = loginJumpUrl;
-                ctx.redirect('/passport/index/index');
+                ctx.redirect('/dash/passport');
             }
 
             return false;

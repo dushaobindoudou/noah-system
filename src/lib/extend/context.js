@@ -31,7 +31,7 @@ module.exports = {
 
         let result = null;
         if (userId) {
-            result = await this.callService('user.getUserInfo', userId);
+            result = await this.callService('user.getUserInfoById', userId);
         }
 
         this.assign({"user": result});

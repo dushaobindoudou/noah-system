@@ -22,13 +22,13 @@ class AdminFilterPolicy extends leek.Policy{
                 const session = ctx.session;
                 const loginJumpUrl = ctx.originalUrl || '/';
                 session.loginJump = loginJumpUrl;
-                ctx.redirect('/passport/index/index');
+                ctx.redirect('/dash/passport');
             }
 
             return false;
         }
 
-        if( ctx.user.role !== 1 ){
+        if( ctx.user.level !== 99 ){
             //非管理员
             if( ctx.xhr ){
                 //ajax 请求，返回JSON

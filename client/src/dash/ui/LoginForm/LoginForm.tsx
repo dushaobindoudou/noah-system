@@ -3,7 +3,7 @@
  */
 
 import * as React from 'react';
-import { Card, Form, Input, Button } from 'antd';
+import { Card, Form, Input, Button, message } from 'antd';
 import axios from 'axios';
 
 const FormItem = Form.Item;
@@ -66,7 +66,7 @@ class LoginForm extends React.Component<any, ILoginState>{
       this.setState({
         isRequest: false
       });
-      alert(err.message);
+      message.error(err.message);
     });
   }
 

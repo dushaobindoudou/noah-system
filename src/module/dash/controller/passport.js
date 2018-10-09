@@ -36,19 +36,24 @@ class PassportIndexController extends Controller{
 
         const {password,userName} = body;
 
-        const result = await ctx.callService('user.findOne',userName);
+        const result = await ctx.callService('user.getUserInfoByName',userName);
 
         if(result){
             //登录成功
-            let oldPassword = result.password || '';
+            let oldPassword = result.pwd || '';
 
             let validate = bcrypt.compareSync(password, oldPassword);
 
             //密码是否正确
             if(validate){
+
+                if(result.status === 2 ){
+                    return this.error('用户被禁用');
+                }
+
                 const userId = result.id;
                 ctx.session.userId = userId;
-                const url = session.loginJump || '/';
+                const url = ctx.session.loginJump || '/';
                 this.ok({
                     url: url
                 });

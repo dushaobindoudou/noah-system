@@ -36,7 +36,7 @@ class UserService extends Service{
         const sql = `INSERT INTO ${USER_TABLE} (name,pwd) VALUES (?, ?)`;
 
         const result = await ctx.app.mysql.query(sql, [name, password]);
-        return result.results.insertId === 1;
+        return result.results.insertId;
     }
     //查询所有用户信息
     async getAllUser(){
@@ -49,18 +49,15 @@ class UserService extends Service{
      * @param {int} id 用户ID
      * @param {string} name 用户名
      * @param {string?} password 加密之后的密码
+     * @param {int?} status 账户状态
      * @returns {boolean}
      */
-    async updateUser(id, name, password){
-        let selectData = [name, id];
-        let strData = ``
-        if(password){
-            selectData = [name, password, id];
-            strData = `password = ?,`;
-        }
-        let sql = `UPDATE ${USER_TABLE} SET name = ?, ${strData}updatedAt = ? WHERE id = ?`;
+    async updateUser(id, name, password, status){
+        const args = [name, password, status, id];
+        
+        let sql = `UPDATE ${USER_TABLE} SET name = ?, password = ?, status = ? WHERE id = ?`;
 
-        let result = await this.ctx.app.mysql.query(sql,selectData);
+        let result = await this.ctx.app.mysql.query(sql,args);
         return result.results.changedRows === 1;
     }
 }
