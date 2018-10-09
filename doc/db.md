@@ -78,6 +78,7 @@ CREATE TABLE `tb_package` (
   `md5` varchar(100) NOT NULL DEFAULT '' COMMENT '下载包的md5',
   `filePath` varchar(200) NOT NULL DEFAULT '' COMMENT '全量包的绝对路径',
   `userId` int(11) NOT NULL COMMENT '本次发版的用户ID',
+  `forceUpdate` tinyint(3) unsigned NOT NULL DEFAULT '0' COMMENT '是否强制更新：0不强制；1强制更新',
   `disablePatch` tinyint(4) DEFAULT '0' COMMENT '是否禁用增量包下载更新。0允许增量更新；1禁用增量更新',
   `createdAt` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updatedAt` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
