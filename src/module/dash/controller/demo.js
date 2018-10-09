@@ -9,7 +9,7 @@ const bcrypt = require('bcrypt');
 class DemoController extends leek.Controller{
 
     async loginAction(){
-        await this.ctx.render('dash/page/demo/login/index.tpl');
+        await this.ctx.render('dash/page/demo/genpwd/index.tpl');
     }
 
     async generatePwdAction(){

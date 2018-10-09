@@ -13,3 +13,6 @@ body{
 a, button, input{
   outline: none;
 }
+
+//引入antd样式文件
+@import '~antd/dist/antd.css';

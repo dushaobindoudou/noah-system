@@ -24,6 +24,7 @@ module.exports = {
                 "react-dom",
                 "lodash",
                 "axios",
+                "antd",
             ],
             "css": [
                 path.resolve(__dirname, './src/common/static/css/base.scss')

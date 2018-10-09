@@ -56,7 +56,7 @@ config.mysql = {
     host: '172.16.3.173',
     user: 'root',
     password: '123123',
-    database: 'node_jimu_system',
+    database: 'noah_system',
     charset: 'utf8mb4',
     timezone: 'local',
     connectTimeout: 10000

@@ -9,6 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "antd": "^3.10.0",
     "axios": "^0.18.0",
     "clipboard-polyfill": "^2.5.4",
     "core-js": "^2.5.7",

@@ -7,7 +7,6 @@
 
 const Controller = leek.Controller;
 const bcrypt = require('bcrypt');
-const salt = bcrypt.genSaltSync(10);
 
 class PassportIndexController extends Controller{
 
@@ -20,26 +19,17 @@ class PassportIndexController extends Controller{
             ctx.response.redirect('/')
             return ;
         }
-        //读取上一次登陆的错误信息
-        let loginError = ctx.session.loginError;
 
-        ctx.session.loginError = null;
-        this.ctx.assign({
-            loginError,
-        });
-        //let addUser = await ctx.callService('user.addUser',{name: 'test1',password:'123456',role:1});
-        //var hash = bcrypt.hashSync("123456", salt);
-
-        return this.render('passport/page/login/login.tpl')
+        return this.render('dash/page/login/index.tpl')
     }
     //退出登录
     async outAction(){
         const {ctx} = this;
         ctx.session.userId = null;
         //跳转到登陆页
-        return ctx.response.redirect('/passport/index/index');
+        ctx.response.redirect('/dash/passport');
     }
-    //登录
+    //登录，异步接口
     async doLoginAction(){
         const {ctx} = this;
         const body = ctx.request.body;
@@ -58,29 +48,23 @@ class PassportIndexController extends Controller{
             if(validate){
                 const userId = result.id;
                 ctx.session.userId = userId;
-                this.afterLoginJump();
+                const url = session.loginJump || '/';
+                this.ok({
+                    url: url
+                });
                 return;
             }else{
-                ctx.session.loginError = '账号或密码错误';
+                this.error('密码错误');
             }
         }else{
-            ctx.session.loginError = '用户不存在';
+            this.error('用户不存在');
         }
-
-        return ctx.redirect('/passport/index/index');
     }
-    //登陆之后, 跳转页面逻辑
-    afterLoginJump(){
-        let {ctx} = this;
-        let session = ctx.session;
-        let url = session.loginJump || '/';
-
-        ctx.redirect( url );
-
-    }
+   
     async modifyAction(){
         return this.render('passport/page/modify/modify.tpl')
     }
+
     async modifyPasswordAction(){
         const {ctx} = this;
         const body = ctx.request.body;
@@ -89,10 +73,10 @@ class PassportIndexController extends Controller{
         const user = ctx.user || {};
         let {name,id} = user;
 
-        let {oldPassword,newPassword,updatedAt} = body;
+        let {oldPassword,newPassword} = body;
 
-        this.log.info(`用户 ${name} 用户id ${id} 在 ${updatedAt} 修改密码 `);
-
+        this.log.info(`用户 ${name} 用户id ${id} 修改密码 `);
+        const salt = bcrypt.genSaltSync(10);
         newPassword = bcrypt.hashSync(newPassword, salt);
         if(name){
             let result = await ctx.callService('user.findOne',name);

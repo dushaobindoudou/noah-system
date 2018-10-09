@@ -2,9 +2,9 @@
 
 系统使用的是 `mysql` 数据库，具体情况如下：
 
-`database`: `noah_system`
-`user`: `noah`
-`password`: ``
+* `database`: `noah_system`
+* `user`: `noah`
+* `password`: ``
 
 
 ## 表结构
