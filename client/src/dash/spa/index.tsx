@@ -19,6 +19,9 @@ import SideMenu from './SideMenu/SideMenu';
 ///页面
 import Home from './pages/Home/index';
 import UserManage from './pages/UserManage/index';
+import CreateApp from './pages/CreateApp/CreateApp';
+import {OwnAppList, ReadAppList, WriteAppList} from './pages/AppList/AppList';
+import AppDetail from './pages/AppDetail/index';
 
 
 const {Header, Content, Sider} = Layout;
@@ -78,6 +81,11 @@ export default class App extends React.Component<any, any> {
                                 <Content style={{background: '#fff'}}>
                                     <Route path="/" exact component={Home}/>
                                     <Route path="/dash/user" exact component={UserManage}/>
+                                    <Route path="/dash/apps/own" exact component={OwnAppList}/>
+                                    <Route path="/dash/apps/read" exact component={ReadAppList}/>
+                                    <Route path="/dash/apps/write" exact component={WriteAppList}/>
+                                    <Route path="/dash/apps/create" exact component={CreateApp}/>
+                                    <Route path="/dash/apps/detail" exact component={AppDetail}/>
                                 </Content>
                             </Layout>
                         </Layout>

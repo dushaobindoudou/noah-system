@@ -76,8 +76,13 @@ class SideBar extends React.Component<ISideMenuProps, any> {
                         <Icon type="shop" />
                         <span>首页</span>
                     </Menu.Item>
-
                     {userMenu}
+                    <SubMenu key="" title={<span><Icon type="idcard" /><span>APP管理</span></span>}>
+                        <Menu.Item key="/dash/apps/own">我拥有的APP</Menu.Item>
+                        <Menu.Item key="/dash/apps/write">我可写的APP</Menu.Item>
+                        <Menu.Item key="/dash/apps/read">我可读的APP</Menu.Item>
+                        <Menu.Item key="/dash/apps/create">创建APP</Menu.Item>
+                    </SubMenu>
                 </Menu>
             </Sider>
         );

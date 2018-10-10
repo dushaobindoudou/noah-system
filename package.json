@@ -35,7 +35,8 @@
     "leekjs": "0.0.13",
     "moment": "^2.22.2",
     "numeral": "^2.0.6",
-    "uid-safe": "^2.1.5"
+    "uid-safe": "^2.1.5",
+    "uuid": "^3.3.2"
   },
   "private": true
 }

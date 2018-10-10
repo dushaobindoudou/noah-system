@@ -13,6 +13,14 @@ module.exports = {
         },
         user: {
             '*': [ 'admin_filter']
+        },
+        apps: {
+            '*': [ 'login_filter'],
+            'appDetail' : [ 'login_filter', { 'name' : 'user_app_access' , 'data' : 'canRead'} ],
+            'publishApp' : [ 'login_filter', { 'name' : 'user_app_access' , 'data' : 'canWrite'} ],
+            'taskList' : [ 'login_filter', { 'name' : 'user_app_access' , 'data' : 'canRead'} ],
+            'taskDetail' : [ 'login_filter', { 'name' : 'user_app_access' , 'data' : 'canRead'}, 'task_fetch' ],
+            'taskLog' : [ 'login_filter', { 'name' : 'user_app_access' , 'data' : 'canRead'}, 'task_fetch' ],
         }
     }
 };
