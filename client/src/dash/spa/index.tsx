@@ -66,7 +66,7 @@ export default class App extends React.Component<any, any> {
                     <div className="app">
                         <Layout style={{height: '100vh'}}>
                             <Header>
-                                <a className="logo" href="/">人人贷活动运营平台</a>
+                                <a className="logo" href="/">Noah System</a>
                                 <div className="header-right-box">
                                     <span className="user-name">登录用户：{name}</span>
                                     <Button style={{marginRight: '10px'}} href="/passport/index/modify">修改密码</Button>

@@ -96,7 +96,7 @@ class UserController extends Controller{
         }
 
         //更新当前用户信息
-        let result = await ctx.callService('user.updateUser', id,name, password, status);
+        let result = await ctx.callService('user.updateUser', userId,name, password, status);
 
         if(result){
             this.ok({

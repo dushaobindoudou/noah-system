@@ -78,25 +78,6 @@ class SideBar extends React.Component<ISideMenuProps, any> {
                     </Menu.Item>
 
                     {userMenu}
-                    <SubMenu key="" title={<span><Icon type="idcard" /><span>白名单管理</span></span>}>
-                        <Menu.Item key="/dash/whitelist">白名单规则列表</Menu.Item>
-                        <Menu.Item key="/dash/addwhitelist">新增白名单</Menu.Item>
-                        <Menu.Item key="/dash/whitelist/userIdList">userId白名单查询</Menu.Item>
-                    </SubMenu>
-                    <SubMenu key="prizeGroup" title={<span><Icon type="trophy" /><span>抽奖管理</span></span>}>
-                        <Menu.Item key="/dash/prize">奖品组列表</Menu.Item>
-                        <Menu.Item key="/dash/prize/drawRecord">中奖记录查询</Menu.Item>
-                        <Menu.Item key="/dash/prize/drawTimes">用户抽奖次数查询</Menu.Item>
-                        {editPrizeMenu}
-                    </SubMenu>
-                    <Menu.Item key="/dash/activity">
-                        <Icon type="profile" />
-                        <span>活动列表</span>
-                    </Menu.Item>
-                    <Menu.Item key="/dash/resource">
-                        <Icon type="upload"/>
-                        <span>文件上传</span>
-                    </Menu.Item>
                 </Menu>
             </Sider>
         );

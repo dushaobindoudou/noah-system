@@ -55,7 +55,7 @@ class UserService extends Service{
     async updateUser(id, name, password, status){
         const args = [name, password, status, id];
         
-        let sql = `UPDATE ${USER_TABLE} SET name = ?, password = ?, status = ? WHERE id = ?`;
+        let sql = `UPDATE ${USER_TABLE} SET name = ?, pwd = ?, status = ? WHERE id = ?`;
 
         let result = await this.ctx.app.mysql.query(sql,args);
         return result.results.changedRows === 1;

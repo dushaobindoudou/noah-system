@@ -10,9 +10,10 @@ import {Layout, message, Form, Input, Button, Select, Modal} from 'antd';
 import axios from 'axios';
 const {Header, Content} = Layout;
 import UserList, { IUser } from './UserList/UserList';
-import SessionStore from 'dash/spa/SessionStore/SessionStore';
+import SessionStore, { User } from 'dash/spa/SessionStore/SessionStore';
 
 const FormItem = Form.Item;
+const Option = Select.Option;
 
 interface IUserManageProps{
     sessionStore?: SessionStore;
@@ -57,6 +58,7 @@ export default class UserManage extends React.Component<IUserManageProps, IUserM
         this.doCreateUser = this.doCreateUser.bind( this );
         this.updateEditUserName = this.updateEditUserName.bind( this );
         this.updateEditUserPwd = this.updateEditUserPwd.bind( this );
+        this.updateEditUserStatus = this.updateEditUserStatus.bind( this );
         this.doUpdateUser = this.doUpdateUser.bind( this );
     }
 
@@ -193,6 +195,14 @@ export default class UserManage extends React.Component<IUserManageProps, IUserM
         });
     }
 
+    updateEditUserStatus(value:number){
+        this.setState({
+            editUser: Object.assign({}, this.state.editUser, {
+                status: value
+            })
+        });
+    }
+
     doUpdateUser(e: React.FormEvent){
         e.preventDefault();
         if( this.state.isLoad ){
@@ -202,7 +212,8 @@ export default class UserManage extends React.Component<IUserManageProps, IUserM
             isLoad: true
         });
         axios.post('/dash/user/update',{
-            name: this.editUser.name,
+            userId: this.state.editUser.id,
+            name: this.state.editUser.name,
             password: this.state.editUser.pwd,
             status: this.state.editUser.status,
         }).then((res)=>{
@@ -236,11 +247,12 @@ export default class UserManage extends React.Component<IUserManageProps, IUserM
         }
 
         return (
-            <Modal title="增加奖品组"
+            <Modal title="编辑用户"
                    visible={true}
+                   onOk={ this.doUpdateUser}
                    onCancel={ () => { this.editUser(null)}}
                    destroyOnClose={true}
-                   okText="确定"
+                   okText="确定修改"
                    cancelText="取消">
                 <Form onSubmit={this.doUpdateUser}>
                         <FormItem label="用户名">
@@ -257,8 +269,11 @@ export default class UserManage extends React.Component<IUserManageProps, IUserM
                                 onChange={this.updateEditUserPwd}
                             />
                         </FormItem>
-                        <FormItem>
-                            <Button type="primary" htmlType="submit">修改用户</Button>
+                        <FormItem label="是否启用账号">
+                            <Select defaultValue={editUser.status} style={{ width: 120 }} onSelect={this.updateEditUserStatus}>
+                                <Option value={User.STATUS_OK}>正常</Option>
+                                <Option value={User.STATUS_DISABLE}>禁用</Option>
+                            </Select>
                         </FormItem>
                     </Form>
             </Modal>
