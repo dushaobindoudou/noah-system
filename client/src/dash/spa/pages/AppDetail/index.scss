@@ -1,3 +1,24 @@
-.info-list{
+.app-info-list{
     
+    .info-item{
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        line-height: 30px;
+        padding: 15px 10px;
+
+        &:nth-of-type(odd){
+            background: #FAFAFA;
+        }
+
+        .info-item-label{
+            width: 200px;
+            color: #999;
+        }
+
+        .info-item-value{
+            flex: 1;
+            color: #333;
+        }
+    }
 }

@@ -5,15 +5,23 @@
 import * as React from 'react';
 import * as qs from 'qs';
 import axios from 'axios';
-import { Spin, message } from 'antd';
+import { Spin, Button, Modal, message } from 'antd';
 
 import { IExistApp, AppPlatform } from 'dash/spa/interface/app';
 
+import AppEditor, { ICancel, ISubmitCallback, IUpdateAppInfo} from './AppEditor/AppEditor';
+
 import './index.scss';
+
+interface IExistDetail extends IExistApp{
+    owner: any;
+}
 
 interface IState{
     isLoad: boolean;
-    app: IExistApp | null;
+    isUpdate: boolean;
+    editorVisible: boolean;
+    app: IExistDetail | null;
 }
 
 export default class AppDetail extends React.Component<any, IState>{
@@ -25,8 +33,14 @@ export default class AppDetail extends React.Component<any, IState>{
 
         this.state = {
             isLoad: true,
+            isUpdate: false,
+            editorVisible: false,
             app: null
         };
+
+        this.showEditModal = this.showEditModal.bind( this );
+        this.doUpdateApp = this.doUpdateApp.bind( this );
+        this.cancelUpdate = this.cancelUpdate.bind( this );
     }
 
     componentDidMount(){
@@ -66,6 +80,81 @@ export default class AppDetail extends React.Component<any, IState>{
         });
     }
 
+    showEditModal(){
+        this.setState({
+            editorVisible: true
+        });
+    }
+
+    doUpdateApp(app: IUpdateAppInfo){
+        if( this.state.isUpdate ){
+            return;
+        }
+        this.setState({
+            isUpdate: true
+        });
+        axios.post('/dash/apps/doUpdate', {
+            appId: app.id,
+            name: app.name,
+            entryFile: app.entryFile,
+            gitUrl: app.gitUrl,
+            ownerName: app.transferUserName,
+            desc: app.desc,
+        }).then( ({data: out}) => {
+            if( out.status === 0 ){
+                this.setState({
+                    isUpdate: false,
+                    app: out.data.app,
+                    editorVisible: false,
+                });
+                message.success('修改APP成功');
+                return;
+            }
+            return Promise.reject( new Error(out.message));
+        })
+        .catch( (err) => {
+            this.setState({
+                isUpdate: false,
+            });
+            message.error(err.message);
+        });
+    }
+
+    cancelUpdate(){
+        this.setState({
+            editorVisible: false
+        });
+    }
+
+    getOperationBar(){
+        if( ! this.state.app ){
+            return null;
+        }
+        return (
+            <div className="app-op-bar">
+                <Button type="danger" onClick={ this.showEditModal }>编辑APP信息</Button>
+            </div>
+        );
+    }
+
+    getAppEditorModal(){
+        if( ! this.state.app ){
+            return null;
+        }
+
+        return (
+            <Modal title="编辑APP"
+                width="700px"
+                   visible={ this.state.editorVisible }
+                   destroyOnClose={true}
+                   footer={null}
+                   onCancel={ this.cancelUpdate }
+                   >
+                   <AppEditor app={ this.state.app } onCancel={this.cancelUpdate} onSubmit={this.doUpdateApp} />
+            </Modal>
+        );
+    }
+
     getAppDom(){
         const { isLoad, app } = this.state;
         if( ! isLoad && ! app ){
@@ -80,7 +169,7 @@ export default class AppDetail extends React.Component<any, IState>{
             return null;
         }
         return (
-            <div className="info-list">
+            <div className="app-info-list">
                 <dl className="info-item">
                     <dt className="info-item-label">APP id</dt>
                     <dd className="info-item-value">{ app.id }</dd>
@@ -111,11 +200,13 @@ export default class AppDetail extends React.Component<any, IState>{
                 </dl>
                 <dl className="info-item">
                     <dt className="info-item-label">应用创建者</dt>
-                    <dd className="info-item-value">{ app.id }</dd>
+                    <dd className="info-item-value">{ app.owner ? app.owner.name : '' }</dd>
                 </dl>
                 <dl className="info-item">
                     <dt className="info-item-label">应用描述</dt>
-                    <dd className="info-item-value">{ app.desc }</dd>
+                    <dd className="info-item-value">
+                        <pre>{ app.desc }</pre>
+                    </dd>
                 </dl>
                 <dl className="info-item">
                     <dt className="info-item-label">应用创建时间</dt>
@@ -141,8 +232,10 @@ export default class AppDetail extends React.Component<any, IState>{
         return (
             <div>
                 <h1>APP详情</h1>
+                { this.getOperationBar() }
                 { loading }
                 { this.getAppDom() }
+                { this.getAppEditorModal() }
             </div>
         )
     }

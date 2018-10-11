@@ -205,6 +205,125 @@ class AppsController extends Controller{
         });
 
     }
+
+    /**
+     * 更新应用信息
+     * @returns {Promise.<void>}
+     */
+    async doUpdateAction(){
+        const ctx = this.ctx;
+        const App = ctx.app.model.App;
+
+        const body = ctx.request.body;
+
+        const user = ctx.user;
+        const userId = user.id;
+
+        const appId = String( body.appId || '').trim();
+        const name = ( body.name || '').trim();
+        const desc = ( body.desc || '').trim();
+        const gitUrl = ( body.gitUrl || '').trim();
+        const entryFile = ( body.entryFile || '').trim();
+        //要转让给的用户名
+        const ownerName = ( body.ownerName || '').trim();
+
+        if( ! appId ){
+            return this.erro('appId不能为空！');
+        }
+
+        let app = null;
+        try{
+            app = await App.findByAppId(appId);
+        }catch(err){
+            this.log.error(`[dash.apps.doUpdateAction]根据appId查找app异常 appId[${appId}] : ${err.message}`);
+        }
+
+        if( ! app ){
+            return this.error('应用不存在！');
+        }
+
+        if( app.ownerId !== userId && ! user.isAdmin() ){
+            //管理员可以修改任何app的信息
+            //除了管理员，只有app拥有者能够修改app信息
+            this.log.warn(`[dash.apps.doUpdateAction]用户尝试非法修改他人的app信息 非法的userId[${user.id}] appId[${appId}]`);
+            return this.error('没有权限');
+        }
+
+        if( name && name !== app.name ){
+            //尝试修改 app 名，需要先检查该app名是否存在
+            try{
+                let isExist = await App.isAppNameExist(name);
+                if( isExist ){
+                    return this.error('要修改的app名字已经存在！');
+                }
+            }catch(err){
+                this.log.error(`[dash.apps.doUpdateAction]判断新的app.name是否存在异常  newName[${name}] ： ${err.message}`);
+            }
+
+            app.name = name;
+        }
+
+        if( desc ){
+            app.desc = desc;
+        }
+
+        if( gitUrl ){
+            app.gitUrl = gitUrl;
+        }
+
+        if( entryFile && entryFile !== app.entryFile ){
+            app.entryFile = entryFile;
+        }
+
+        const User = ctx.app.model.User;
+
+        //要讲app转让给的目标用户
+        let targetUser = null;
+
+        if( ownerName  ){
+            try{
+                targetUser = await User.findByName(ownerName);
+            }catch(err){
+                targetUser = null;
+                this.log.error(`[dash.apps.doUpdateAction]判断新的app.owner_id用户是否存在异常 ownerName[${ownerName}] ： ${err.message}`);
+                return this.error('判断要转让的目标用户是否存在异常！');
+            }
+
+            if( ! targetUser ){
+                return this.error('要转让的目标用户不存在！');
+            }
+        }
+
+        if( targetUser && targetUser.id !== app.ownerId ){
+            //将当前app转让给其他用户
+            app.ownerId = targetUser.id;
+        }
+
+        let success = false;
+
+        try{
+            success = await app.save();
+        }catch(err){
+            this.log.error(`[dash.apps.doUpdateAction]更新app信息到数据库异常 appId[${appId}] ownerId[${user.id}] : ${err.message}`);
+        }
+
+        if( success ){
+
+            this.log.info(`[dash.apps.doUpdateAction]用户更新APP信息成功  user[${user.name}] 修改后的APP数据[${JSON.stringify(app)}]`);
+
+            try{
+                app = await App.findByAppId(appId);
+            }catch(err){
+                this.log.error(`[dash.apps.doUpdateAction]根据appId再次查找app异常 appId[${appId}] : ${err.message}`);
+            }
+
+            this.ok({
+                app: app
+            });
+        }else{
+            this.error('更新应用信息到数据库异常！');
+        }
+    }
 }
 
 
