@@ -4,6 +4,7 @@
 
 import * as React from 'react';
 import * as qs from 'qs';
+import {withRouter, RouteComponentProps} from 'react-router';
 import { Spin, Button, Tabs, Form, Input, message } from 'antd';
 
 import { getAppDetail, publishApp } from 'dash/spa/service/app';

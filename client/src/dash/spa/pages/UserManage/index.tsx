@@ -9,8 +9,9 @@ import {observer, inject} from "mobx-react";
 import {Layout, message, Form, Input, Button, Select, Modal} from 'antd';
 import axios from 'axios';
 const {Header, Content} = Layout;
-import UserList, { IUser } from './UserList/UserList';
+import UserList from './UserList/UserList';
 import SessionStore, { User } from 'dash/spa/SessionStore/SessionStore';
+import { IUser } from 'dash/spa/interface/user';
 
 const FormItem = Form.Item;
 const Option = Select.Option;

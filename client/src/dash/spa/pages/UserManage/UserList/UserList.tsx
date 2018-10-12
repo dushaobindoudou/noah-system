@@ -5,16 +5,7 @@
 import * as React from 'react';
 import { Table, Button, Spin, Modal,  Form, Input, Icon, InputNumber, Row, Col, message } from 'antd';
 import SessionStore, { User } from 'dash/spa/SessionStore/SessionStore';
-
-export interface IUser{
-    id: number;
-    name: string;
-    level: number;
-    status: number;
-    pwd?: string;
-    createdAt: string;
-    updatedAt: string;
-}
+import { IUser } from 'dash/spa/interface/user';
 
 export interface IEditUserCallback{
     (user: IUser): void;
