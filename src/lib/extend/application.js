@@ -13,6 +13,7 @@ const utils = require('../../core/util.js');
 const appFactory = require('../../core/model/app.js');
 const userFactory = require('../../core/model/user.js');
 const userAppFactory = require('../../core/model/user_app.js');
+const taskFactory = require('../../core/model/task.js');
 
 module.exports = {
 
@@ -27,6 +28,7 @@ module.exports = {
         App: appFactory(this.mysql),
         User: userFactory(this.mysql),
         UserApp: userAppFactory(this.mysql),
+        Task: taskFactory(this.mysql),
       };
     }
     return this[MODEL_SYMBOL];

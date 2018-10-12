@@ -6,11 +6,13 @@
 'use strict';
 
 const path = require('path');
+const fse = require('fs-extra');
 
 const redisHost = require('./common/redis_host.js');
 
 const config = {
-
+    //离线任务的bin目录
+    binDir : path.join( leek.appRoot, `bin`),
 };
 
 //日志

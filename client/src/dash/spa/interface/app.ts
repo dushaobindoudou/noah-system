@@ -26,5 +26,5 @@ export interface IExistApp extends IApp{
     ownerId: number;
     createdAt: string;
     updatedAt: string;
+    owner: any;
 }
-

@@ -23,9 +23,14 @@
   },
   "homepage": "https://gitlab.com/rrd-fe/noah-system#README",
   "dependencies": {
+    "adm-zip": "^0.4.11",
+    "archiver": "^3.0.0",
     "bcrypt": "^3.0.1",
+    "bsdp": "^1.0.3",
     "debug": "^4.0.1",
+    "fs-diff": "^0.2.0",
     "fs-extra": "^6.0.1",
+    "git-clone": "^0.1.0",
     "leek-mysql": "^1.0.0",
     "leek-redis": "^1.0.1",
     "leek-session": "^1.0.1",
@@ -36,7 +41,8 @@
     "moment": "^2.22.2",
     "numeral": "^2.0.6",
     "uid-safe": "^2.1.5",
-    "uuid": "^3.3.2"
+    "uuid": "^3.3.2",
+    "yargs": "^12.0.2"
   },
   "private": true
 }

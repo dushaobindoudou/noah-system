@@ -4,7 +4,27 @@
 
 'use strict';
 
+const path = require('path');
+const fs = require('fs');
+const childProcess = require("child_process");
+const fse = require('fs-extra');
+const uuidV4 = require('uuid/v4');
+const moment = require('moment');
+
 const Controller = leek.Controller;
+
+
+//全量包存放根目录
+const packageDir = leek.getConfig( 'packageDir');
+//增量包存放根目录
+const diffDir = leek.getConfig('diffDir');
+//发版任务日志的根目录
+const publishLogDir = leek.getConfig('publishLogDir');
+//离线的发版任务bin目录
+const offlineBinDir = leek.getConfig('binDir');
+//mysql config
+const mysqlConfig = leek.getConfig('mysql');
+
 
 class AppsController extends Controller{
 
@@ -25,6 +45,10 @@ class AppsController extends Controller{
     }
 
     async detailAction(){
+        return this.render('dash/page/index/index.tpl');
+    }
+
+    async publishAction(){
         return this.render('dash/page/index/index.tpl');
     }
 
@@ -323,6 +347,129 @@ class AppsController extends Controller{
         }else{
             this.error('更新应用信息到数据库异常！');
         }
+    }
+
+    /**
+     * APP发版
+     * @returns {Promise.<void>}
+     */
+    async publishAppAction(){
+        const ctx = this.ctx;
+        const body = ctx.request.body;
+
+        const appId = body.appId;
+        const appVersion = ( body.appVersion || '').trim();
+        const uploadFullPackagePath = ( body.uploadFullPackagePath || '').trim();
+        const uploadFullPackageMd5 = ( body.uploadFullPackageMd5 || '').trim();
+        const branchName = ( body.branchName || '').trim();
+        const desc = ( body.desc || '').trim();
+        const abTest = ( body.abTest || '').trim();
+
+        if( ! appVersion || ! desc ){
+            return this.error('app版本、发版描述必填！');
+        }
+
+        if( (! uploadFullPackagePath || ! uploadFullPackageMd5) && ! branchName ){
+            return this.error('上传全量包路径/全量包md5、分支号不能同时为空');
+        }
+
+        const user = ctx.user;
+        const app = ctx.state.app;
+
+        const today = moment().format(`YYYYMMDD`);
+
+        ////////////////////准备离线任务//////////
+        let logFile = path.join( publishLogDir, `app_${app.id}`, `${today}`, `${uuidV4()}.log`);
+
+        try{
+            fse.ensureFileSync(logFile);
+        }catch(err){
+            this.log.error(`[dash.apps.publishAppAction]创建离线发版任务的日志文件异常  userId[${user.id}] appId[${appId}] logFile[${logFile}] 错误信息: ${err.message}`);
+            return this.error('创建发版任务的日志文件异常！');
+        }
+
+        const Task = ctx.app.model.Task;
+
+        //写入任务表
+        let taskId = 0;
+
+        let task = new Task({
+            appId : appId,
+            userId : user.id,
+            appVersion: appVersion,
+            uploadFullPackagePath: uploadFullPackagePath,
+            uploadFullPackageMd5: uploadFullPackageMd5,
+            branchName : branchName,
+            logFile : logFile,
+            desc : desc,
+            abTest : abTest
+        });
+
+        let taskSaved = false;
+
+        try{
+            taskSaved = await task.save();
+        }catch(err){
+            taskSaved = false;
+            this.log.error(`[dash.apps.publishAppAction]insert离线发版任务到mysql异常！ 错误信息：${err.message}`);
+        }
+
+        if( ! taskSaved ){
+            //任务写入mysql失败，删除日志文件并返回错误
+            this.log.error(`[dash.apps.publishAppAction]保存任务失败，准备删除日志文件，并返回错误`);
+            try{
+                fse.removeSync(logFile);
+            }catch(err){
+                this.log.error(`[dash.apps.publishAppAction]保存任务失败时，删除日志文件异常！ 错误信息：${err.message}`);
+            }
+            return this.error('写入发版任务到数据库异常！');
+        }
+
+        //更新为新插入mysql的id
+        taskId = task.id;
+
+
+        //启动离线任务进程
+        const cli = [
+            './index.js',
+            '--task_id', taskId,
+            '--mysql_host', mysqlConfig.host,
+            '--mysql_user', mysqlConfig.user,
+            '--mysql_password', mysqlConfig.password,
+            '--mysql_database', mysqlConfig.database,
+            '--package_dir', packageDir,
+            '--diff_dir', diffDir
+        ];
+
+        this.log.info(`准备调用的离线发版命令为： ${cli.join(' ')}`);
+        this.log.info(`本次发版的日志文件为： ${logFile}`);
+
+        let logFd = -1;
+        let publishProcess = null;
+
+        try{
+            logFd = fs.openSync(logFile, 'w');
+            publishProcess = childProcess.spawn('node', cli, {
+                cwd : offlineBinDir,
+                //环境变量传给脚本，脚本里会读取 NODE_ENV
+                env: process.env,
+                detached : true,
+                stdio: [ 'ignore', logFd, logFd ]
+            });
+            publishProcess.on('error', (err) => {
+                this.log.error(`[dash.apps.publishAppAction]新开进程执行离线任务error  user[${user.name}]   错误信息： ${err.message}`);
+            });
+            publishProcess.unref();
+        }catch(err){
+            this.log.error(`新开进程执行离线发版异常  错误信息： ${err.message}`);
+            return this.error('启动离线发版任务子进程失败！');
+        }
+
+        this.log.info(`[dash.apps.publishAppAction]创建离线发版任务的成功  userId[${user.id}] appId[${appId}] uploadFullPackagePath[${uploadFullPackagePath}] uploadFullPackageMd5[${uploadFullPackageMd5}] branchName[${branchName}] abTest[${abTest}] logFile[${logFile}] `);
+
+        this.ok({
+            taskId : taskId
+        });
     }
 }
 

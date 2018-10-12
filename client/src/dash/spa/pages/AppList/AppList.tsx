@@ -4,7 +4,8 @@
 
 import * as React from 'react';
 import axios from 'axios';
-import { message, Table } from 'antd';
+import { message, Table, Button } from 'antd';
+import {withRouter, RouteComponentProps} from 'react-router';
 import * as app from 'dash/spa/interface/app';
 
 //用户APP列表不同的权限
@@ -22,13 +23,13 @@ interface IState{
     list: app.IExistApp[];
 }
 
-function factory(type: ListType): React.ComponentClass{
-    return class AppList extends React.Component<any, IState>{
+function factory(type: ListType): React.ComponentClass<RouteComponentProps, IState>{
+    return class AppList extends React.Component<RouteComponentProps, IState>{
 
         private title: string;
         private columns: Array<object>;
 
-        constructor(props: any){
+        constructor(props: RouteComponentProps){
             super(props);
 
             this.state = {
@@ -43,6 +44,9 @@ function factory(type: ListType): React.ComponentClass{
                     title: 'app名',
                     dataIndex: 'name',
                     key: 'name',
+                    render: (name: string, row: app.IExistApp) => {
+                        return <Button type="primary" onClick={ this.showAppDetail.bind(this, row.id)}>{ row.name }</Button>;
+                    }
                 },
                 {
                     title: 'app key',
@@ -58,11 +62,20 @@ function factory(type: ListType): React.ComponentClass{
                     }
                 }
             ];
+
         }
 
         componentDidMount(){
             document.title = this.title;
             this.refreshList();
+        }
+
+        /**
+         * 跳转到APP详情页
+         * @param appId {number}
+         */
+        showAppDetail(appId: number){
+            this.props.history.push(`/dash/apps/detail?appId=${appId}`);
         }
 
         refreshList(){
@@ -121,7 +134,7 @@ function factory(type: ListType): React.ComponentClass{
     }
 }
 
-export const OwnAppList = factory(ListType.OWN);
-export const ReadAppList = factory(ListType.READ);
-export const WriteAppList = factory(ListType.WRITE);
+export const OwnAppList = withRouter(factory(ListType.OWN));
+export const ReadAppList = withRouter(factory(ListType.READ));
+export const WriteAppList = withRouter(factory(ListType.WRITE));
 

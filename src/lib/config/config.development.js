@@ -6,13 +6,25 @@
 'use strict';
 
 const path = require('path');
+const fse = require('fs-extra');
 
 const redisHost = require('./common/redis_host.js');
 
 const distRoot = path.normalize(`${leek.appRoot}/../dist`);
 
-const config = {};
+const config = {
+    //全量包的存放根目录
+    packageDir : path.join( distRoot, `dirs`, `full`),
+    //增量包的存放根目录
+    diffDir : path.join( distRoot, `dirs`, `diff`),
+    //app发版的日志存放根目录
+    publishLogDir : path.join( distRoot, `publish_logs`),
+};
 
+//确保相应目录存在
+fse.ensureDirSync(config.packageDir);
+fse.ensureDirSync(config.diffDir);
+fse.ensureDirSync(config.publishLogDir);
 
 config.log = {
     name: 'noah-system',

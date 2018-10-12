@@ -82,7 +82,6 @@ class SideBar extends React.Component<ISideMenuProps, any> {
                         <Menu.Item key="/dash/apps/write">我可写的APP</Menu.Item>
                         <Menu.Item key="/dash/apps/read">我可读的APP</Menu.Item>
                         <Menu.Item key="/dash/apps/create">创建APP</Menu.Item>
-                        <Menu.Item key="/dash/apps/detail">APP详情</Menu.Item>
                     </SubMenu>
                 </Menu>
             </Sider>

@@ -5,30 +5,28 @@
 import * as React from 'react';
 import * as qs from 'qs';
 import axios from 'axios';
+import {withRouter, RouteComponentProps} from 'react-router';
 import { Spin, Button, Modal, message } from 'antd';
 
 import { IExistApp, AppPlatform } from 'dash/spa/interface/app';
+import { getAppDetail } from 'dash/spa/service/app';
 
 import AppEditor, { ICancel, ISubmitCallback, IUpdateAppInfo} from './AppEditor/AppEditor';
 
 import './index.scss';
 
-interface IExistDetail extends IExistApp{
-    owner: any;
-}
-
 interface IState{
     isLoad: boolean;
     isUpdate: boolean;
     editorVisible: boolean;
-    app: IExistDetail | null;
+    app: IExistApp | null;
 }
 
-export default class AppDetail extends React.Component<any, IState>{
+class AppDetail extends React.Component<RouteComponentProps, IState>{
 
     private appId: number;
 
-    constructor(props: any){
+    constructor(props: RouteComponentProps){
         super(props);
 
         this.state = {
@@ -41,6 +39,7 @@ export default class AppDetail extends React.Component<any, IState>{
         this.showEditModal = this.showEditModal.bind( this );
         this.doUpdateApp = this.doUpdateApp.bind( this );
         this.cancelUpdate = this.cancelUpdate.bind( this );
+        this.showPublishPage = this.showPublishPage.bind( this );
     }
 
     componentDidMount(){
@@ -60,16 +59,12 @@ export default class AppDetail extends React.Component<any, IState>{
         this.setState({
             isLoad: true
         });
-        axios.get(`/dash/apps/appDetail?appId=${this.appId}`)
-        .then( ({data}) => {
-            if( data.status === 0 ){
-                this.setState({
-                    isLoad: false,
-                    app: data.data.app
-                });
-                return;
-            }
-            return Promise.reject( new Error(data.message));
+        getAppDetail(this.appId)
+        .then( (app) => {
+            this.setState({
+                isLoad: false,
+                app: app
+            });
         })
         .catch( (err) => {
             this.setState({
@@ -84,6 +79,10 @@ export default class AppDetail extends React.Component<any, IState>{
         this.setState({
             editorVisible: true
         });
+    }
+
+    showPublishPage(){
+        this.props.history.push(`/dash/apps/publish?appId=${this.state.app.id}`);
     }
 
     doUpdateApp(app: IUpdateAppInfo){
@@ -132,6 +131,7 @@ export default class AppDetail extends React.Component<any, IState>{
         }
         return (
             <div className="app-op-bar">
+                <Button type="primary" onClick={ this.showPublishPage }>发版</Button>
                 <Button type="danger" onClick={ this.showEditModal }>编辑APP信息</Button>
             </div>
         );
@@ -240,4 +240,6 @@ export default class AppDetail extends React.Component<any, IState>{
         )
     }
 }
+
+export default withRouter(AppDetail);
 
