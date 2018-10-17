@@ -11,5 +11,8 @@
     },
     "include": [
         "./src/**/*"
+    ],
+    "files": [
+        "scss-css.d.ts"
     ]
 }
