@@ -28,27 +28,38 @@ const mysqlConfig = leek.getConfig('mysql');
 
 class AppsController extends Controller{
 
+    //当前用户，拥有的APP列表页
     async ownAction(){
         return this.render('dash/page/index/index.tpl');
     }
 
+    //当前用户，读权限的APP列表页
     async readAction(){
         return this.render('dash/page/index/index.tpl');
     }
 
+    //当前用户，写权限的APP列表页
     async writeAction(){
         return this.render('dash/page/index/index.tpl');
     }
 
+    //创建APP页面
     async createAction(){
         return this.render('dash/page/index/index.tpl');
     }
 
+    //APP详情页
     async detailAction(){
         return this.render('dash/page/index/index.tpl');
     }
 
+    //app发版页
     async publishAction(){
+        return this.render('dash/page/index/index.tpl');
+    }
+
+    //全量包详情页
+    async packageDetailAction(){
         return this.render('dash/page/index/index.tpl');
     }
 
@@ -470,6 +481,160 @@ class AppsController extends Controller{
         this.ok({
             taskId : taskId
         });
+    }
+
+    //获取某个RN全量版本的详情
+    //必须传  appId，因为权限判定是用 appId 来判断的
+    async versionDetailAction(){
+
+        const ctx = this.ctx;
+        //全量包在数据库表中的自增ID
+        const packageId = ctx.query.packageId;
+
+        const app = ctx.state.app;
+
+        const Package = ctx.app.model.Package;
+
+        let rnPackage = null;
+
+        try{
+            rnPackage = await Package.findByPackageId(packageId);
+        }catch(err){
+            rnPackage = null;
+            this.log.error(`[dash.apps.versionDetailAction]根据packageId获取全量包记录异常！ packageId[${packageId}]  错误信息： ${err.message}`);
+        }
+
+        if( ! rnPackage ){
+            return this.error(`未找到对应的全量包`);
+        }
+
+        if( rnPackage.appId !== app.id ){
+            //用户构造非法的 appId，尝试读取没有权限的全量包记录！
+            return this.error(`全量包不属于该APP`);
+        }
+
+        const User = ctx.app.model.User;
+
+        //获取发版人信息
+        try{
+            let publisher = await User.findById(rnPackage.userId);
+            rnPackage.publisher = publisher;
+        }catch(err){
+            this.log.error(`[dash.apps.versionDetailAction]根据user_id获取全量包的发版人信息异常！ packageId[${packageId}] userId[${rnPackage.userId}]  错误信息： ${err.message}`);
+        }
+
+        const Task = ctx.app.model.Task;
+        //获取本次版本对应的任务信息
+        try{
+            let task = await Task.findByPackageId(rnPackage.id);
+            rnPackage.task = task;
+        }catch(err){
+            this.log.error(`[dash.apps.versionDetailAction]根据package_id获取全量包的任务信息异常！ packageId[${packageId}] userId[${rnPackage.userId}]  错误信息： ${err.message}`);
+        }
+
+        this.ok({
+            app: app,
+            package : rnPackage
+        });
+    }
+
+    /**
+     * 允许用户更新某个全量包的  status  abTest disablePatch forceUpdate 字段！
+     * 属于危险操作，因此，需要额外校验用户的 登录密码
+     * @returns {Promise.<void>}
+     */
+    async updatePackageAction(){
+        const ctx = this.ctx;
+
+        const User = ctx.app.model.User;
+        const Package = ctx.app.model.Package;
+
+        const user = ctx.user;
+        const app = ctx.state.app;
+
+        const body = ctx.request.body;
+        const packageId = body.packageId;
+        const password = body.password;
+        const status = parseInt(body.status, 10);
+        const abTest = body.abTest || '';
+        const disablePatch = parseInt(body.disablePatch, 10);
+        const forceUpdate = parseInt(body.forceUpdate, 10);
+
+        let dangerUser = null;
+
+        try{
+            dangerUser = await User.findByNamePassword(user.name, password);
+        }catch(err){
+            this.log.warn(`[App.updatePackage]查找匹配用户异常 userName[${user.name}] password[${password}]: ${err.message}`);
+            dangerUser = null;
+        }
+
+        if( ! dangerUser ){
+            return this.error(`密码错误`);
+        }
+
+        let rnPackage = null;
+
+        try{
+            rnPackage = await Package.findByPackageId(packageId);
+        }catch(err){
+            rnPackage = null;
+            this.log.error(`[App.updatePackage]根据packageId获取全量包记录异常！ packageId[${packageId}]  错误信息： ${err.message}`);
+        }
+
+        if( ! rnPackage ){
+            return this.error(`未找到对应的全量包`);
+        }
+
+        if( rnPackage.appId !== app.id ){
+            //用户构造非法的 appId，尝试读取没有权限的全量包记录！
+            return this.error(`全量包不属于该APP`);
+        }
+
+        if( ! Package.isStatusValid(status) ){
+            return this.error(`status值非法！`);
+        }
+
+        if( ! Package.isPatchStatusValid(disablePatch)){
+            return this.error(`disablePatch值非法！`);
+        }
+
+        if( ! Package.isForceUpdateValid(forceUpdate) ){
+            return this.error(`forceUpdate值非法！`);
+        }
+
+        if( status === rnPackage.status 
+            && abTest === rnPackage.abTest 
+            && disablePatch === rnPackage.disablePatch 
+            && forceUpdate === rnPackage.forceUpdate ){
+            //用户未做修改，直接返回
+            return this.error(`没有改动，无需保存`);
+        }
+
+        let success = false;
+        let msg = '';
+        try{
+            success = await rnPackage.update({
+                status: status,
+                abTest: abTest,
+                disablePatch: disablePatch,
+                forceUpdate: forceUpdate
+            });
+        }catch(err){
+            this.log.error(`[App.updatePackage]更新package全量包记录异常！ packageId[${packageId}]  错误信息： ${err.message}`);
+            success = false;
+            msg = err.message;
+        }
+
+        if( success ){
+            this.log.info(`[App.updatePackage]更新package全量包记录成功！appId[${app.id}] user[${user.name}] packageId[${packageId}]  修改后status[${status}] 修改后ab_test[${abTest}]  `);
+            this.ok({
+                rnPackage
+            });
+        }else{
+            this.error(msg || `更新全量包异常`);
+        }
+
     }
 
 }

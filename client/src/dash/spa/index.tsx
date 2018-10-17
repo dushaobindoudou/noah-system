@@ -24,6 +24,7 @@ import {OwnAppList, ReadAppList, WriteAppList} from './pages/AppList/AppList';
 import AppDetail from './pages/AppDetail/index';
 import PublishApp from './pages/PulibshApp/PublishApp';
 import TaskDetail from './pages/TaskDetail/TaskDetail';
+import PackageDetail from './pages/PackageDetail/PackageDetail';
 
 
 const {Header, Content, Sider} = Layout;
@@ -89,7 +90,9 @@ export default class App extends React.Component<any, any> {
                                     <Route path="/dash/apps/create" exact component={CreateApp}/>
                                     <Route path="/dash/apps/detail" exact component={AppDetail}/>
                                     <Route path="/dash/apps/publish" exact component={PublishApp}/>
+                                    <Route path="/dash/apps/packageDetail" exact component={PackageDetail}/>
                                     <Route path="/dash/tasks/detail" exact component={TaskDetail}/>
+                                
                                 </Content>
                             </Layout>
                         </Layout>

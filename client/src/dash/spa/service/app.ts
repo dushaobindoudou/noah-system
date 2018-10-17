@@ -3,7 +3,7 @@
  */
 
 import axios from 'axios';
-import { IExistApp } from "../interface/app";
+import { IExistApp, IPackage } from "../interface/app";
 
 /**
  * 获取APP详情
@@ -28,6 +28,42 @@ export function publishApp(data: object): Promise<number>{
     .then( ({data}) => {
         if( data.status === 0 ){
             return data.data.taskId;
+        }
+        return Promise.reject( new Error(data.message));
+    });
+}
+
+export interface PackageDetailResult{
+    app: IExistApp;
+    fullPackage: IPackage;
+}
+
+/**
+ * 获取全量包信息
+ * @param data 
+ */
+export function getPackageDetail(data: object): Promise<PackageDetailResult>{
+    return axios.get(`/dash/apps/versionDetail`, { params: data})
+    .then( ({data}): any => {
+        if( data.status === 0 ){
+            return {
+                app: data.data.app,
+                fullPackage: data.data.package
+            };
+        }
+        return Promise.reject( new Error(data.message));
+    });
+}
+
+/**
+ * 更新某个全量包的一些字段
+ * @param data 
+ */
+export function updatePackage(data: any): Promise<IPackage>{
+    return axios.post(`/dash/apps/updatePackage`, data)
+    .then( ({data}) => {
+        if( data.status === 0 ){
+            return data.data.fullPackage;
         }
         return Promise.reject( new Error(data.message));
     });

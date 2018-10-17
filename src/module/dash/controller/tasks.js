@@ -4,6 +4,8 @@
 
 'use strict';
 
+const send = require('koa-send');
+
 const Controller = leek.Controller;
 
 class TasksController extends Controller{
@@ -40,6 +42,7 @@ class TasksController extends Controller{
         }
 
         this.ok({
+            app: app,
             task : {
                 id : task.id,
                 branchName : task.branchName,
@@ -54,6 +57,37 @@ class TasksController extends Controller{
                 updatedAt : task.updatedAt
             }
         });
+    }
+
+    /**
+     * 查看某个APP的某一次发版任务的日志
+     * @returns {Promise.<void>}
+     */
+    async taskLogAction(){
+
+        const ctx = this.ctx;
+
+        const task = ctx.state.task;
+        const app = ctx.state.app;
+
+        ctx.set('content-type', 'text/plain; charset=utf-8');
+
+        let logFile = task.logFile;
+
+        if( ! logFile ){
+            return this.error(`该任务没有日志文件`);
+        }
+
+        this.log.info(`[User.taskLog]准备输出日志文件:  ${logFile}`);
+
+        try{
+            await send(ctx, logFile, {
+                root: '/'
+            });
+        }catch(err){
+            this.log.error(`[User.taskLog]读取日志文件流异常1 ！ 错误信息： ${err.message}`);
+            this.error(`读取日志文件异常`);
+        }
     }
 }
 

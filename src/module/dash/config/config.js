@@ -19,6 +19,10 @@ module.exports = {
             'appDetail' : [ 'login_filter', { 'name' : 'user_app_access' , 'data' : 'canRead'} ],
             'publishApp' : [ 'login_filter', { 'name' : 'user_app_access' , 'data' : 'canWrite'} ],
             'taskList' : [ 'login_filter', { 'name' : 'user_app_access' , 'data' : 'canRead'} ],
+            'versionList' : [ 'login_filter', { 'name' : 'user_app_access' , 'data' : 'canRead'} ],
+            'versionDetail' : [ 'login_filter', { 'name' : 'user_app_access' , 'data' : 'canRead'} ],
+            'updatePackage' : [ 'login_filter', { 'name' : 'user_app_access' , 'data' : 'canWrite'} ],
+            'patchList' : [ 'login_filter', { 'name' : 'user_app_access' , 'data' : 'canRead'} ],
         },
         tasks: {
             '*': [ 'login_filter'],

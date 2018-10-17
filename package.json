@@ -31,6 +31,7 @@
     "fs-diff": "^0.2.0",
     "fs-extra": "^6.0.1",
     "git-clone": "^0.1.0",
+    "koa-send": "^5.0.0",
     "leek-mysql": "^1.0.0",
     "leek-redis": "^1.0.1",
     "leek-session": "^1.0.1",

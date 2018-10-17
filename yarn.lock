@@ -1222,6 +1222,15 @@ koa-send@^4.1.3:
     mz "^2.6.0"
     resolve-path "^1.4.0"
 
+koa-send@^5.0.0:
+  version "5.0.0"
+  resolved "https://registry.yarnpkg.com/koa-send/-/koa-send-5.0.0.tgz#5e8441e07ef55737734d7ced25b842e50646e7eb"
+  dependencies:
+    debug "^3.1.0"
+    http-errors "^1.6.3"
+    mz "^2.7.0"
+    resolve-path "^1.4.0"
+
 koa-session@^5.8.1:
   version "5.9.0"
   resolved "https://registry.yarnpkg.com/koa-session/-/koa-session-5.9.0.tgz#e0283fa81999afe25f7c7979f3dec2b8a26ac005"
