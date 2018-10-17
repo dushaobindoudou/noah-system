@@ -8,11 +8,15 @@ import {withRouter, RouteComponentProps} from 'react-router';
 import { Spin, Button, message } from 'antd';
 import { IExistTask } from 'dash/spa/interface/task';
 import { getTaskDetail } from 'dash/spa/service/task';
+import { IExistApp } from 'dash/spa/interface/app';
 
 interface IState{
     isLoad: boolean;
+    app: IExistApp | null;
     task: IExistTask | null;
 }
+
+import styles from './TaskDetail_.scss';
 
 class TaskDetail extends React.Component<RouteComponentProps, IState>{
 
@@ -24,9 +28,13 @@ class TaskDetail extends React.Component<RouteComponentProps, IState>{
 
         this.state = {
             isLoad: true,
+            app: null,
             task: null
         };
 
+        this.showAppDetail = this.showAppDetail.bind( this );
+        this.showTaskLog = this.showTaskLog.bind( this );
+        this.showRelateVersionDetail = this.showRelateVersionDetail.bind( this );
     }
 
     componentDidMount(){
@@ -51,9 +59,10 @@ class TaskDetail extends React.Component<RouteComponentProps, IState>{
             isLoad: true
         });
         getTaskDetail(this.taskId, this.appId)
-        .then( (task) => {
+        .then( ({ app, task}) => {
             this.setState({
                 isLoad: false,
+                app: app,
                 task: task
             });
         }).catch( (err) => {
@@ -70,10 +79,55 @@ class TaskDetail extends React.Component<RouteComponentProps, IState>{
 
     }
 
+    //查看任务日志
+    showTaskLog(){
+
+    }
+
+    //跳转到RN版本详情页
+    showRelateVersionDetail(){
+
+    }
+
+    getInfoDom(){
+        const { isLoad, task } = this.state;
+        if( isLoad ){
+            return null;
+        }
+        if( ! task ){
+            return (
+                <div>任务不存在，或没有权限</div>
+            );
+        }
+        return (
+            <div >
+                <div>
+                    <Button>查看日志</Button>
+                </div>
+                <div className="taskDetailInfoWrap">
+                    <dl className={styles.taskInfoItem}>
+                        <dt className={styles.taskInfoLabel}>任务ID</dt>
+                        <dd className={styles.taskInfoValue}>{task.id}</dd>
+                    </dl>
+                </div>
+            </div>
+        );
+    }
+
     render(){
+
+        const { isLoad } = this.state;
+
+        let loading = null;
+        if(isLoad){
+            loading = <Spin />;
+        }
+
         return (
             <div>
                 <h1>发版任务详情</h1>
+                { loading }
+                { this.getInfoDom() }
             </div>
         );
     }

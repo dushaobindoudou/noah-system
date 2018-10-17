@@ -30,7 +30,7 @@ enum PublishType{
 
 const PUBLISH_TYPE_STORE_KEY = '__publish_type__';
 
-export default class PublishApp extends React.Component<any, IState>{
+export default class PublishApp extends React.Component<RouteComponentProps, IState>{
 
     private appId: number;
     private activeTabKey: PublishType;
@@ -46,7 +46,7 @@ export default class PublishApp extends React.Component<any, IState>{
     private uploadAbtestRef = React.createRef<HTMLTextAreaElement>();
     private uploadDescRef = React.createRef<HTMLTextAreaElement>();
 
-    constructor(props: any){
+    constructor(props: RouteComponentProps){
         super(props);
 
         this.state = {
@@ -139,8 +139,8 @@ export default class PublishApp extends React.Component<any, IState>{
                 isRequest: false
             });
             message.success('任务提交成功，正在发布中...');
-            //TODO 跳转到任务详情页
-
+            //跳转到任务详情页
+            this.props.history.push(`/dash/tasks/detail?appId=${this.state.app.id}&taskId=${taskId}`);
         })
         .catch( (err) => {
             this.setState({
