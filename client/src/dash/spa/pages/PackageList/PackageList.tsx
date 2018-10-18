@@ -302,22 +302,18 @@ class PackageList extends React.Component<RouteComponentProps, IState>{
 
         const { isLoad } = this.state;
 
-        let loading = null;
-        if(isLoad){
-            loading = <Spin size="large" />;
-        }
-
         return (
             <div>
                 <h1>全量包列表</h1>
-                { loading }
-                { this.getQueryForm() }
-                <Table 
-                    bordered
-                    rowKey="id"
-                    pagination={false}
-                    dataSource={this.state.list} 
-                    columns={this.columns} />
+                <Spin size="large" spinning={isLoad}>
+                    { this.getQueryForm() }
+                    <Table 
+                        bordered
+                        rowKey="id"
+                        pagination={false}
+                        dataSource={this.state.list} 
+                        columns={this.columns} />
+                </Spin>
             </div>
         );
     }
