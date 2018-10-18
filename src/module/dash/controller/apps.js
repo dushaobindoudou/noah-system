@@ -10,6 +10,7 @@ const childProcess = require("child_process");
 const fse = require('fs-extra');
 const uuidV4 = require('uuid/v4');
 const moment = require('moment');
+const send = require('koa-send');
 
 const Controller = leek.Controller;
 
@@ -809,6 +810,57 @@ class AppsController extends Controller{
             fullPackage: rnPackage,
             patchList: list,
         });
+    }
+
+    /**
+     * 下载某个APP下，某个native版本的最新的全量包
+     */
+    async downloadLatestPackageAction(){
+        const ctx = this.ctx;
+        const query = ctx.query;
+        const appKey = query.appKey;
+        const appVersion = query.appVersion;
+
+        const App = ctx.app.model.App;
+        const Package = ctx.app.model.Package;
+
+        let app = null;
+        try{
+            app = await App.findByAppKey(appKey);
+        }catch(err){
+            this.log.error(`[dash.apps.downloadLatestPackageAction]查找app详情异常 appId[${app.id}] 错误信息: ${err.message}`);
+        }
+
+        if( ! app ){
+            ctx.status = 404;
+            ctx.body = `appKey对应的APP不存在`;
+            return;
+        }
+
+        let fullPackage = null;
+        try{
+            fullPackage = await Package.findLatest(app.id, appVersion);
+        }catch(err){
+            this.log.error(`[dash.apps.downloadLatestPackageAction]查找app的某个native对应最新的全量包异常 appId[${app.id}] appVersion[${appVersion}] 错误信息: ${err.message}`);
+        }
+
+        if( ! fullPackage ){
+            ctx.status = 404;
+            ctx.body = `未找到对应的全量包`;
+            return;
+        }
+
+        ctx.set('x-package-md5', fullPackage.md5);
+
+        try{
+            await send(ctx, fullPackage.filePath, {
+                root: '/'
+            });
+        }catch(err){
+            this.log.error(`[dash.apps.downloadLatestPackageAction]输出全量包文件异常 ！ filePath[${fullPackage.filePath}] 错误信息： ${err.message}`);
+            ctx.status = 500;
+            ctx.body = `输出文件流失败`;
+        }
     }
 
 }

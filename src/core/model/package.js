@@ -136,6 +136,28 @@ module.exports = function(mysqlClient){
             return obj;
         }
 
+        /**
+         * 查找某个APP下，某个native版本对应的最新的全量包
+         * @param {number} appId 
+         * @param {string} appVersion 
+         */
+        static async findLatest(appId, appVersion){
+            let result = await mysqlClient.select(TB_NAME, {
+                where : {
+                    appId: appId,
+                    appVersion : appVersion,
+                },
+                orders : [ [ 'packageVersion', 'desc'] ],
+                limit: 1
+            });
+            let data = result.results[0];
+            let obj = null;
+            if( data ){
+                obj = new Package( data );
+            }
+            return obj;
+        }
+
         constructor(args){
             this.id = args.id;
             this.appId = args.appId;
