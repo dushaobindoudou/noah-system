@@ -63,6 +63,11 @@ class AppsController extends Controller{
         return this.render('dash/page/index/index.tpl');
     }
 
+    //增量包列表页
+    async patchesAction(){
+        return this.render('dash/page/index/index.tpl');
+    }
+
     /**
      * 异步接口
      * 当前登录用户拥有的APP列表
@@ -629,12 +634,46 @@ class AppsController extends Controller{
         if( success ){
             this.log.info(`[App.updatePackage]更新package全量包记录成功！appId[${app.id}] user[${user.name}] packageId[${packageId}]  修改后status[${status}] 修改后ab_test[${abTest}]  `);
             this.ok({
-                rnPackage
+                fullPackage: rnPackage
             });
         }else{
             this.error(msg || `更新全量包异常`);
         }
 
+    }
+
+    //某个APP下，某个RN版本的增量包列表
+    async patchListAction(){
+        const ctx = this.ctx;
+        //全量包在数据库表中的自增ID
+        const packageId = ctx.query.packageId;
+
+        if( ! packageId ){
+            return this.error(`packageId不能为空`);
+        }
+
+        const app = ctx.state.app;
+
+        const Patch = ctx.app.model.Patch;
+
+        let list = [];
+
+        try{
+            list = await Patch.findByAppId(app.id, {
+                where : {
+                    packageId : packageId
+                },
+                orders : [ [ 'compareVersion', 'desc'] ]
+            });
+        }catch(err){
+            this.log.error(`[dash.apps.patchListAction]读取增量包列表异常！ appId[${app.id}] packageId[${packageId}]  错误信息：${err.message}`);
+            list = [];
+        }
+
+        this.ok({
+            app: app,
+            patchList: list
+        });
     }
 
 }

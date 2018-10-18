@@ -66,7 +66,7 @@ module.exports = function(mysqlClient){
         }
 
         static isForceUpdateValid(s){
-            return FORCE_UPDATE_STATUS.ENABLE === s || FORCE_UPDATE_STATUS.DISABLE === s;
+            return FORCE_UPDATE_STATUS.FORCE === s || FORCE_UPDATE_STATUS.NO_FORCE === s;
         }
 
         /**

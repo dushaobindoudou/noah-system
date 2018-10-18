@@ -3,7 +3,7 @@
  */
 
 import axios from 'axios';
-import { IExistApp, IPackage } from "../interface/app";
+import { IExistApp, IPackage, IPatch } from "../interface/app";
 
 /**
  * 获取APP详情
@@ -64,6 +64,30 @@ export function updatePackage(data: any): Promise<IPackage>{
     .then( ({data}) => {
         if( data.status === 0 ){
             return data.data.fullPackage;
+        }
+        return Promise.reject( new Error(data.message));
+    });
+}
+
+type PatchList = Array<IPatch>;
+
+export interface IPatchListResult{
+    app: IExistApp;
+    patchList: PatchList;
+}
+
+/**
+ * 获取某个APP下，某个全量包对应的增量包列表
+ * @param data 
+ */
+export function getPatchList(data: any): Promise<IPatchListResult>{
+    return axios.get(`/dash/apps/patchList`, { params: data})
+    .then( ({data}): any => {
+        if( data.status === 0 ){
+            return {
+                app: data.data.app,
+                patchList: data.data.patchList
+            };
         }
         return Promise.reject( new Error(data.message));
     });

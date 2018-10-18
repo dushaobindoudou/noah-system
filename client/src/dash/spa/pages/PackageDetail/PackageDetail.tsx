@@ -61,6 +61,7 @@ class PackageDetail extends React.Component<RouteComponentProps, IState>{
         };
 
         this.showTaskDetail = this.showTaskDetail.bind( this );
+        this.showPatchList = this.showPatchList.bind( this );
         this.doUpdatePackage = this.doUpdatePackage.bind( this );
         this.showEditor = this.showEditor.bind( this );
         this.closeEditor = this.closeEditor.bind( this );
@@ -117,6 +118,11 @@ class PackageDetail extends React.Component<RouteComponentProps, IState>{
             return;
         }
         this.props.history.push(`/dash/tasks/detail?appId=${this.state.app.id}&taskId=${fullPackage.task.id}`);
+    }
+
+    //跳转到增量包列表页
+    showPatchList(){
+        this.props.history.push(`/dash/apps/patches?appId=${this.appId}&packageId=${this.packagId}`);
     }
 
     doUpdatePackage(){
@@ -228,7 +234,7 @@ class PackageDetail extends React.Component<RouteComponentProps, IState>{
         return (
             <div>
                 <div className="op-bar">
-                    <Button>查看增量包列表</Button>
+                    <Button onClick={ this.showPatchList }>查看增量包列表</Button>
                     <Button onClick={ this.showEditor } type="danger">修改版本状态</Button>
                 </div>
                 <div>
@@ -353,7 +359,7 @@ class PackageDetail extends React.Component<RouteComponentProps, IState>{
                         </Select>
                     </FormItem>
                     <FormItem label="AB Test规则">
-                        <TextArea
+                        <Input.TextArea
                             value={editorData.abTest}
                             onChange={ this.updateAbTest }
                         />
@@ -383,7 +389,7 @@ class PackageDetail extends React.Component<RouteComponentProps, IState>{
 
         return (
             <div>
-                <h1>全量包详情页</h1>
+                <h1>全量包详情</h1>
                 { loading }
                 { this.getInfoDom() }
                 { this.getEditorModal() }

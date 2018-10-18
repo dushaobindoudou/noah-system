@@ -92,3 +92,16 @@ export interface IPackage{
     //这个版本对应的发布任务
     task: IExistTask;
 }
+
+//增量包entity定义
+export interface IPatch{
+    id: number;
+    appId: number;
+    packageId: number;
+    packageVersion: number;
+    compareVersion: number;
+    md5: string;
+    filePath: string;
+    createdAt: string;
+    updatedAt: string;
+}
