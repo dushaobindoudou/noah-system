@@ -99,7 +99,7 @@ function factory(type: ListType): React.ComponentClass<RouteComponentProps, ISta
                         isLoad: false,
                         list: data.data.apps || []
                     });
-                    return;
+                    return Promise.resolve();
                 }
                 return Promise.reject( new Error(data.message));
             })

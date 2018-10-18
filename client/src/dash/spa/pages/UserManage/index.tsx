@@ -79,7 +79,7 @@ export default class UserManage extends React.Component<IUserManageProps, IUserM
                     isLoad: false,
                     users: out.data || []
                 });
-                return;
+                return Promise.resolve();
             }
             return Promise.reject(new Error(out.message));
 
@@ -129,7 +129,7 @@ export default class UserManage extends React.Component<IUserManageProps, IUserM
                 //刷新列表
                 this.refreshList();
                 message.success('创建用户成功');
-                return;
+                return Promise.resolve();
             }
             return Promise.reject(new Error(out.message));
 
@@ -212,11 +212,14 @@ export default class UserManage extends React.Component<IUserManageProps, IUserM
         this.setState({
             isLoad: true
         });
+
+        const editUser = this.state.editUser!;
+
         axios.post('/dash/user/update',{
-            userId: this.state.editUser.id,
-            name: this.state.editUser.name,
-            password: this.state.editUser.pwd,
-            status: this.state.editUser.status,
+            userId: editUser.id,
+            name: editUser.name,
+            password: editUser.pwd,
+            status: editUser.status,
         }).then((res)=>{
             const out = res.data || {};
             if( out.status === 0 ){
@@ -227,7 +230,7 @@ export default class UserManage extends React.Component<IUserManageProps, IUserM
                 //刷新列表
                 this.refreshList();
                 message.success('编辑用户成功');
-                return;
+                return Promise.resolve();
             }
             return Promise.reject(new Error(out.message));
 

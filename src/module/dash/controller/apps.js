@@ -58,6 +58,11 @@ class AppsController extends Controller{
         return this.render('dash/page/index/index.tpl');
     }
 
+    //全量包列表页
+    async packageListAction(){
+        return this.render('dash/page/index/index.tpl');
+    }
+
     //全量包详情页
     async packageDetailAction(){
         return this.render('dash/page/index/index.tpl');
@@ -485,6 +490,107 @@ class AppsController extends Controller{
 
         this.ok({
             taskId : taskId
+        });
+    }
+
+    //获取某个APP的RN版本列表
+    async versionListAction(){
+
+        const ctx = this.ctx;
+        const query = ctx.query;
+
+        //native版本号
+        let appVersion = parseInt(query.appVersion, 10);
+        //筛选发版的用户名
+        let publishUserName = ( query.publishUserName || '').trim();
+        //限制发版的时间范围 (start, end )
+        let startTimestamp = parseInt(query.startTimestamp, 10);
+        let endTimestamp = parseInt(query.endTimestamp, 10);
+
+        const app = ctx.state.app;
+        const appId = app.id;
+
+        const User = ctx.app.model.User;
+        const Package = ctx.app.model.Package;
+
+        let targetUser = null;
+        if( publishUserName ){
+            //根据用户名，查找对应用户
+            try{
+                targetUser = await User.findByName(publishUserName);
+            }catch(err){
+                targetUser = null;
+                this.log.error(`[dash.apps.versionListAction]根据用户名查找用户异常！  userName[${publishUserName}]  错误信息：${err.message}`);
+            }
+            if( ! targetUser ){
+                return this.error(`未找到对应的用户`);
+            }
+        }
+
+        let sql = `SELECT * FROM ${Package.TABLE_NAME} WHERE appId = ? `;
+        let values = [ appId ];
+
+        if( ! isNaN(appVersion) ){
+            sql += ` AND appVersion = ? `;
+            values.push( appVersion );
+        }
+
+        if( targetUser ){
+            sql += ` AND userId = ? `;
+            values.push( targetUser.id );
+        }
+
+        if( ! isNaN(startTimestamp) ){
+            sql += ` AND UNIX_TIMESTAMP(createdAt) > ? `;
+            values.push( Math.floor( startTimestamp / 1000) );
+        }
+
+        if( ! isNaN(endTimestamp) ){
+            sql += ` AND UNIX_TIMESTAMP(createdAt) < ? `;
+            values.push( Math.floor( endTimestamp / 1000) );
+        }
+
+        //按照发版时间，倒序
+        sql += ` ORDER BY createdAt DESC`;
+
+        let list = [];
+
+        try{
+            let temp = await Package.query(sql, values);
+            list = temp.results || [];
+        }catch(err){
+            list = [];
+            http.log.error(`[dash.apps.versionListAction]查找APP版本列表异常！  appId[${app.id}] userName[${publishUserName}]  错误信息：${err.message}`);
+        }
+
+        //获取版本对应的发版人
+        try{
+            let ids = list.map( (obj) => {
+                return obj.userId;
+            });
+            if( ids.length > 0 ){
+                ids = ids.filter( (id, index, arr) => {
+                    return arr.indexOf(id) === index;
+                });
+                let users = await User.findByIdList(ids);
+                let userMap = {};
+                users.forEach( (user) => {
+                    let obj = user.toJSON();
+                    userMap[user.id] = obj;
+                });
+
+                list.forEach( (obj) => {
+                    obj.publisher = userMap[obj.userId];
+                });
+            }
+
+        }catch(err){
+            this.log.error(`[dash.apps.versionListAction]查找各个版本对应的发版用户异常！  appId[${app.id}] userName[${publishUserName}]  错误信息：${err.message}`);
+        }
+
+        this.ok({
+            app,
+            list,
         });
     }
 

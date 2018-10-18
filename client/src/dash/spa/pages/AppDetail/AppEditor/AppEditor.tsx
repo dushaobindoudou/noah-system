@@ -45,11 +45,11 @@ export default class AppEditor extends React.Component<IProps>{
     private onSubmit(e: React.FormEvent){
         e.preventDefault();
         const data = Object.assign({}, this.props.app, {
-            name: this.nameRef.current.input.value,
-            entryFile: this.entryFileRef.current.input.value,
-            transferUserName: this.transferUserRef.current.input.value,
-            gitUrl: this.gitUrlRef.current.input.value,
-            desc: this.descRef.current.value
+            name: this.nameRef.current!.input.value,
+            entryFile: this.entryFileRef.current!.input.value,
+            transferUserName: this.transferUserRef.current!.input.value,
+            gitUrl: this.gitUrlRef.current!.input.value,
+            desc: this.descRef.current!.value
         });
         this.props.onSubmit(data);
     }

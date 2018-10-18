@@ -127,7 +127,7 @@ class PatchList extends React.Component<RouteComponentProps, IState>{
      * @param packageVersion 
      */
     showPackageDetailByVersion(packageVersion: number){
-        this.props.history.push(`/dash/apps/packageDetail?appId=${this.appId}&appVersion=${encodeURIComponent(this.state.fullPackage.appVersion)}&packageVersion=${packageVersion}`);
+        this.props.history.push(`/dash/apps/packageDetail?appId=${this.appId}&appVersion=${encodeURIComponent(this.state.fullPackage!.appVersion)}&packageVersion=${packageVersion}`);
     }
 
     fetchPatchList(){

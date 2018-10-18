@@ -67,7 +67,9 @@ class TaskDetail extends React.Component<RouteComponentProps, IState>{
 
     fetchTask(){
 
-        clearTimeout(this.refreshTimer);
+        if( this.refreshTimer ){
+            window.clearTimeout(this.refreshTimer);
+        }
         this.refreshTimer = null;
 
         this.setState({
@@ -109,7 +111,7 @@ class TaskDetail extends React.Component<RouteComponentProps, IState>{
             return;
         }
 
-        window.open(`/dash/tasks/taskLog?appId=${this.state.app.id}&taskId=${this.state.task.id}`);
+        window.open(`/dash/tasks/taskLog?appId=${this.state.app!.id}&taskId=${this.state.task!.id}`);
     }
 
     //跳转到RN版本详情页
@@ -122,7 +124,7 @@ class TaskDetail extends React.Component<RouteComponentProps, IState>{
             //没有生成对应的全量包
             return message.error(`没有生成对应的全量包`);
         }
-        this.props.history.push(`/dash/apps/packageDetail?appId=${this.state.app.id}&packageId=${task.packageId}`);
+        this.props.history.push(`/dash/apps/packageDetail?appId=${this.state.app!.id}&packageId=${task.packageId}`);
 
     }
 

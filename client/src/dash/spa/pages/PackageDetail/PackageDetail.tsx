@@ -64,6 +64,7 @@ class PackageDetail extends React.Component<RouteComponentProps, IState>{
 
         this.showTaskDetail = this.showTaskDetail.bind( this );
         this.showPatchList = this.showPatchList.bind( this );
+        this.showPackageListPage = this.showPackageListPage.bind( this );
         this.doUpdatePackage = this.doUpdatePackage.bind( this );
         this.showEditor = this.showEditor.bind( this );
         this.closeEditor = this.closeEditor.bind( this );
@@ -128,12 +129,17 @@ class PackageDetail extends React.Component<RouteComponentProps, IState>{
         if( ! fullPackage || ! fullPackage.task ){
             return;
         }
-        this.props.history.push(`/dash/tasks/detail?appId=${this.state.app.id}&taskId=${fullPackage.task.id}`);
+        this.props.history.push(`/dash/tasks/detail?appId=${this.state.app!.id}&taskId=${fullPackage.task.id}`);
     }
 
     //跳转到增量包列表页
     showPatchList(){
         this.props.history.push(`/dash/apps/patches?appId=${this.appId}&packageId=${this.packagId}`);
+    }
+
+    //打开当前APP的全量包列表页
+    showPackageListPage(){
+        this.props.history.push(`/dash/apps/packageList?appId=${this.state.app!.id}`);
     }
 
     doUpdatePackage(){
@@ -144,9 +150,11 @@ class PackageDetail extends React.Component<RouteComponentProps, IState>{
             isUpdating: true
         });
         const { editorData } = this.state;
+        const app = this.state.app!;
+        const fullPackage = this.state.fullPackage!;
         const data = {
-            appId: this.state.app.id,
-            packageId: this.state.fullPackage.id,
+            appId: app.id,
+            packageId: fullPackage.id,
             status: editorData.status,
             forceUpdate: editorData.forceUpdate,
             disablePatch: editorData.disablePatch,
@@ -247,6 +255,7 @@ class PackageDetail extends React.Component<RouteComponentProps, IState>{
                 <div className="op-bar">
                     <Button onClick={ this.showPatchList }>查看增量包列表</Button>
                     <Button onClick={ this.showEditor } type="danger">修改版本状态</Button>
+                    <Button onClick={ this.showPackageListPage }>全量包列表</Button>
                 </div>
                 <div>
                     <dl className="packageInfoItem">

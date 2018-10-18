@@ -33,6 +33,29 @@ export function publishApp(data: object): Promise<number>{
     });
 }
 
+//全量包列表返回数据结构
+export interface PackageListResult{
+    app: IExistApp;
+    list: IPackage[];
+}
+
+/**
+ * 按照某些条件，查询某个APP的全量包列表
+ * @param data 
+ */
+export function getPackageList(data: any): Promise<PackageListResult>{
+    return axios.get(`/dash/apps/versionList`, { params: data})
+    .then( ({data}): any => {
+        if( data.status === 0 ){
+            return {
+                app: data.data.app,
+                list: data.data.list
+            };
+        }
+        return Promise.reject( new Error(data.message));
+    });
+}
+
 export interface PackageDetailResult{
     app: IExistApp;
     fullPackage: IPackage;

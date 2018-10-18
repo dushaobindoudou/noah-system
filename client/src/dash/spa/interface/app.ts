@@ -88,9 +88,9 @@ export interface IPackage{
     createdAt: string;
     updatedAt: string;
     //发布这个版本的用户
-    publisher: IUser;
+    publisher?: IUser;
     //这个版本对应的发布任务
-    task: IExistTask;
+    task?: IExistTask;
 }
 
 //增量包entity定义

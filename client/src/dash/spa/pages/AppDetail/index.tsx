@@ -40,6 +40,7 @@ class AppDetail extends React.Component<RouteComponentProps, IState>{
         this.doUpdateApp = this.doUpdateApp.bind( this );
         this.cancelUpdate = this.cancelUpdate.bind( this );
         this.showPublishPage = this.showPublishPage.bind( this );
+        this.showPackageListPage = this.showPackageListPage.bind( this );
     }
 
     componentDidMount(){
@@ -81,8 +82,14 @@ class AppDetail extends React.Component<RouteComponentProps, IState>{
         });
     }
 
+    //跳转到发版页面
     showPublishPage(){
-        this.props.history.push(`/dash/apps/publish?appId=${this.state.app.id}`);
+        this.props.history.push(`/dash/apps/publish?appId=${this.appId}`);
+    }
+
+    //打开当前APP的全量包列表页
+    showPackageListPage(){
+        this.props.history.push(`/dash/apps/packageList?appId=${this.appId}`);
     }
 
     doUpdateApp(app: IUpdateAppInfo){
@@ -107,7 +114,7 @@ class AppDetail extends React.Component<RouteComponentProps, IState>{
                     editorVisible: false,
                 });
                 message.success('修改APP成功');
-                return;
+                return Promise.resolve();
             }
             return Promise.reject( new Error(out.message));
         })
@@ -133,6 +140,7 @@ class AppDetail extends React.Component<RouteComponentProps, IState>{
             <div className="app-op-bar">
                 <Button type="primary" onClick={ this.showPublishPage }>发版</Button>
                 <Button type="danger" onClick={ this.showEditModal }>编辑APP信息</Button>
+                <Button onClick={ this.showPackageListPage }>全量包列表</Button>
             </div>
         );
     }
