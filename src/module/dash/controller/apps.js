@@ -500,7 +500,7 @@ class AppsController extends Controller{
         const query = ctx.query;
 
         //native版本号
-        let appVersion = parseInt(query.appVersion, 10);
+        let appVersion = query.appVersion;
         //筛选发版的用户名
         let publishUserName = ( query.publishUserName || '').trim();
         //限制发版的时间范围 (start, end )
@@ -530,7 +530,7 @@ class AppsController extends Controller{
         let sql = `SELECT * FROM ${Package.TABLE_NAME} WHERE appId = ? `;
         let values = [ appId ];
 
-        if( ! isNaN(appVersion) ){
+        if( appVersion ){
             sql += ` AND appVersion = ? `;
             values.push( appVersion );
         }

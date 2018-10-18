@@ -259,27 +259,27 @@ export default class UserManage extends React.Component<IUserManageProps, IUserM
                    okText="确定修改"
                    cancelText="取消">
                 <Form onSubmit={this.doUpdateUser}>
-                        <FormItem label="用户名">
-                            <Input
-                                type="text"
-                                value={ editUser.name }
-                                onChange={this.updateEditUserName}
-                            />
-                        </FormItem>
-                        <FormItem label="密码">
-                            <Input
-                                type="text"
-                                value={ editUser.pwd}
-                                onChange={this.updateEditUserPwd}
-                            />
-                        </FormItem>
-                        <FormItem label="是否启用账号">
-                            <Select defaultValue={editUser.status} style={{ width: 120 }} onSelect={this.updateEditUserStatus}>
-                                <Option value={User.STATUS_OK}>正常</Option>
-                                <Option value={User.STATUS_DISABLE}>禁用</Option>
-                            </Select>
-                        </FormItem>
-                    </Form>
+                    <FormItem label="用户名">
+                        <Input
+                            type="text"
+                            value={ editUser.name }
+                            onChange={this.updateEditUserName}
+                        />
+                    </FormItem>
+                    <FormItem label="密码">
+                        <Input
+                            type="text"
+                            value={ editUser.pwd}
+                            onChange={this.updateEditUserPwd}
+                        />
+                    </FormItem>
+                    <FormItem label="是否启用账号">
+                        <Select defaultValue={editUser.status} style={{ width: 120 }} onSelect={this.updateEditUserStatus}>
+                            <Option value={User.STATUS_OK}>正常</Option>
+                            <Option value={User.STATUS_DISABLE}>禁用</Option>
+                        </Select>
+                    </FormItem>
+                </Form>
             </Modal>
         );
     }
