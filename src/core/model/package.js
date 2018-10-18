@@ -115,6 +115,27 @@ module.exports = function(mysqlClient){
             return obj;
         }
 
+        /**
+         * 根据 appVersion 查找对应的 app
+         * @param appVersion {string} native版本号
+         * @param packageVersion {int} 全量包版本号
+         * @returns {Promise.<*>}
+         */
+        static async findByAppPackageVersion(appVersion, packageVersion){
+            let result = await mysqlClient.select(TB_NAME, {
+                where : {
+                    appVersion : appVersion,
+                    packageVersion: packageVersion
+                }
+            });
+            let data = result.results[0];
+            let obj = null;
+            if( data ){
+                obj = new Package( data );
+            }
+            return obj;
+        }
+
         constructor(args){
             this.id = args.id;
             this.appId = args.appId;

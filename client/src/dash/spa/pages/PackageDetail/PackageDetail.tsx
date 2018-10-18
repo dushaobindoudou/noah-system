@@ -39,6 +39,8 @@ class PackageDetail extends React.Component<RouteComponentProps, IState>{
 
     private appId: number;
     private packagId: number;
+    private appVersion: string;
+    private packageVersion: string;
 
     constructor(props: RouteComponentProps){
         super(props);
@@ -77,9 +79,12 @@ class PackageDetail extends React.Component<RouteComponentProps, IState>{
         const searchConf = qs.parse(location.search.substring(1));
         this.appId = parseInt(searchConf.appId, 10);
         this.packagId = parseInt(searchConf.packageId, 10);
+        this.appVersion = searchConf.appVersion;
+        this.packageVersion = searchConf.packageVersion;
 
-        if( isNaN(this.appId) || isNaN(this.packagId)){
-            message.error('appId packageId非法！');
+        if( isNaN(this.appId) 
+        || ( isNaN(this.packagId) && ! this.appVersion && ! this.packageVersion ) ){
+            message.error('appId packageId appVersion packageVersion非法！');
             this.setState({
                 isLoad: false,
                 fullPackage: null
@@ -94,8 +99,14 @@ class PackageDetail extends React.Component<RouteComponentProps, IState>{
         this.setState({
             isLoad: true,
         });
-        getPackageDetail({appId: this.appId, packageId: this.packagId})
+        getPackageDetail({
+            appId: this.appId, 
+            packageId: this.packagId || '', 
+            appVersion: this.appVersion, 
+            packageVersion: this.packageVersion
+        })
         .then( ({fullPackage, app}) => {
+            this.packagId = fullPackage.id;
             this.setState({
                 isLoad: false,
                 app: app,

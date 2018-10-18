@@ -73,6 +73,7 @@ type PatchList = Array<IPatch>;
 
 export interface IPatchListResult{
     app: IExistApp;
+    fullPackage: IPackage;
     patchList: PatchList;
 }
 
@@ -86,6 +87,7 @@ export function getPatchList(data: any): Promise<IPatchListResult>{
         if( data.status === 0 ){
             return {
                 app: data.data.app,
+                fullPackage: data.data.fullPackage,
                 patchList: data.data.patchList
             };
         }

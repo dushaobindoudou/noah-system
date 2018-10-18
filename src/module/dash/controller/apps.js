@@ -490,11 +490,14 @@ class AppsController extends Controller{
 
     //获取某个RN全量版本的详情
     //必须传  appId，因为权限判定是用 appId 来判断的
+    //可以根据 packageId 查询；也可以根据 appVersion+packageVersion查询
     async versionDetailAction(){
 
         const ctx = this.ctx;
         //全量包在数据库表中的自增ID
         const packageId = ctx.query.packageId;
+        const appVersion = ctx.query.appVersion;
+        const packageVersion = ctx.query.packageVersion;
 
         const app = ctx.state.app;
 
@@ -502,11 +505,22 @@ class AppsController extends Controller{
 
         let rnPackage = null;
 
-        try{
-            rnPackage = await Package.findByPackageId(packageId);
-        }catch(err){
-            rnPackage = null;
-            this.log.error(`[dash.apps.versionDetailAction]根据packageId获取全量包记录异常！ packageId[${packageId}]  错误信息： ${err.message}`);
+        if( packageId ){
+            //通过 packageId 查询详情
+            try{
+                rnPackage = await Package.findByPackageId(packageId);
+            }catch(err){
+                rnPackage = null;
+                this.log.error(`[dash.apps.versionDetailAction]根据packageId获取全量包记录异常！ packageId[${packageId}]  错误信息： ${err.message}`);
+            }
+        }else if( appVersion && packageVersion){
+            //通过 appVersion  packageVersion 查询详情
+            try{
+                rnPackage = await Package.findByAppPackageVersion(appVersion, packageVersion);
+            }catch(err){
+                rnPackage = null;
+                this.log.error(`[dash.apps.versionDetailAction]根据appVersin/packageVersion获取全量包记录异常！ appVersion[${appVersion}] packageVersion[${packageVersion}]  错误信息： ${err.message}`);
+            }
         }
 
         if( ! rnPackage ){
@@ -584,7 +598,7 @@ class AppsController extends Controller{
             rnPackage = await Package.findByPackageId(packageId);
         }catch(err){
             rnPackage = null;
-            this.log.error(`[App.updatePackage]根据packageId获取全量包记录异常！ packageId[${packageId}]  错误信息： ${err.message}`);
+            this.log.error(`[dash.apps.updatePackageAction]根据packageId获取全量包记录异常！ packageId[${packageId}]  错误信息： ${err.message}`);
         }
 
         if( ! rnPackage ){
@@ -626,13 +640,13 @@ class AppsController extends Controller{
                 forceUpdate: forceUpdate
             });
         }catch(err){
-            this.log.error(`[App.updatePackage]更新package全量包记录异常！ packageId[${packageId}]  错误信息： ${err.message}`);
+            this.log.error(`[dash.apps.updatePackageAction]更新package全量包记录异常！ packageId[${packageId}]  错误信息： ${err.message}`);
             success = false;
             msg = err.message;
         }
 
         if( success ){
-            this.log.info(`[App.updatePackage]更新package全量包记录成功！appId[${app.id}] user[${user.name}] packageId[${packageId}]  修改后status[${status}] 修改后ab_test[${abTest}]  `);
+            this.log.info(`[dash.apps.updatePackageAction]更新package全量包记录成功！appId[${app.id}] user[${user.name}] packageId[${packageId}]  修改后status[${status}] 修改后ab_test[${abTest}]  `);
             this.ok({
                 fullPackage: rnPackage
             });
@@ -654,7 +668,21 @@ class AppsController extends Controller{
 
         const app = ctx.state.app;
 
+        const Package = ctx.app.model.Package;
         const Patch = ctx.app.model.Patch;
+
+        let rnPackage = null;
+
+        try{
+            rnPackage = await Package.findByPackageId(packageId);
+        }catch(err){
+            rnPackage = null;
+            this.log.error(`[dash.apps.patchListAction]根据packageId获取全量包记录异常！ packageId[${packageId}]  错误信息： ${err.message}`);
+        }
+
+        if( ! rnPackage ){
+            return this.error(`未找到对应的全量包`);
+        }
 
         let list = [];
 
@@ -672,7 +700,8 @@ class AppsController extends Controller{
 
         this.ok({
             app: app,
-            patchList: list
+            fullPackage: rnPackage,
+            patchList: list,
         });
     }
 
