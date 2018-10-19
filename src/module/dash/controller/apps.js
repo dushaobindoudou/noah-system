@@ -74,6 +74,11 @@ class AppsController extends Controller{
         return this.render('dash/page/index/index.tpl');
     }
 
+    //某个APP下有权限的用户列表页
+    async usersAction(){
+        return this.render('dash/page/index/index.tpl');
+    }
+
     /**
      * 异步接口
      * 当前登录用户拥有的APP列表
@@ -372,6 +377,73 @@ class AppsController extends Controller{
     }
 
     /**
+     * 读取对某个app拥有的所有用户列表
+     * 
+     * @returns {Promise.<void>}
+     */
+    async userListAction(){
+        const ctx = this.ctx;
+        const App = ctx.app.model.App;
+
+        const query = ctx.query;
+        // let access = (query.access || '').trim();
+
+        const app = ctx.state.app;
+        const appAccess = ctx.state.appAccess;
+        const appId = app.id;
+
+        const UserApp = ctx.app.model.UserApp;
+
+        let arr = [];
+
+        try{
+            arr = await UserApp.findByAppId(app.id);
+        }catch(err){
+            this.log.error(`[dash.apps.usersAction]查找app下某个权限的数据异常 appId[${appId}] access[${access}] 错误信息：${err.message}`);
+            return this.error(`获取权限列表异常`);
+        }
+
+        const User = ctx.app.model.User;
+
+        //读取每一条权限所对应的用户信息
+        let usersRequest = arr.map(function(obj){
+            return User.findById(obj.userId).then(function(user){
+                if( user ){
+                    user = user.toJSON();
+                    user.canRead = obj.canRead;
+                    user.canWrite = obj.canWrite;
+                    user.access = obj.access;
+                    user.createdAt = obj.createdAt;
+                    user.updatedAt = obj.updatedAt;
+                }
+                return user;
+            }).catch(function(){
+                return null;
+            });
+        });
+
+        let users = [];
+
+        try{
+            users = await Promise.all(usersRequest);
+        }catch(err){
+            this.log.error(`[dash.apps.usersAction]批量获取用户数据异常 appId[${appId}] access[${access}] 错误信息：${err.message}`);
+            return this.error(`获取权限列表异常`);
+
+        }
+
+        //过滤掉通过 userId 没找到用户的数据，过滤掉 admin 账号
+        users = users.filter(function(obj){
+            return  obj && ! obj.isAdmin;
+        });
+
+        this.ok({
+            app,
+            users,
+        });
+    }
+
+    /**
      * APP发版
      * @returns {Promise.<void>}
      */
@@ -561,7 +633,7 @@ class AppsController extends Controller{
             list = temp.results || [];
         }catch(err){
             list = [];
-            http.log.error(`[dash.apps.versionListAction]查找APP版本列表异常！  appId[${app.id}] userName[${publishUserName}]  错误信息：${err.message}`);
+            this.log.error(`[dash.apps.versionListAction]查找APP版本列表异常！  appId[${app.id}] userName[${publishUserName}]  错误信息：${err.message}`);
         }
 
         //获取版本对应的发版人

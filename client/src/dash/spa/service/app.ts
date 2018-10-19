@@ -3,7 +3,7 @@
  */
 
 import axios from 'axios';
-import { IExistApp, IPackage, IPatch } from "../interface/app";
+import { IExistApp, IPackage, IPatch, IAppUser } from "../interface/app";
 
 /**
  * 获取APP详情
@@ -112,6 +112,31 @@ export function getPatchList(data: any): Promise<IPatchListResult>{
                 app: data.data.app,
                 fullPackage: data.data.fullPackage,
                 patchList: data.data.patchList
+            };
+        }
+        return Promise.reject( new Error(data.message));
+    });
+}
+
+export interface IAppUserListResult{
+    app: IExistApp;
+    users: IAppUser[];
+} 
+
+/**
+ * 获取某个APP下，有权限的用户列表
+ * @param data 
+ */
+export function getAppUsers(appId: number): Promise<IAppUserListResult>{
+    const data = {
+        appId,
+    };
+    return axios.get(`/dash/apps/userList`, { params: data})
+    .then( ({data}): any => {
+        if( data.status === 0 ){
+            return {
+                app: data.data.app,
+                users: data.data.users,
             };
         }
         return Promise.reject( new Error(data.message));

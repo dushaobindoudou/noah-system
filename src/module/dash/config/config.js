@@ -22,6 +22,7 @@ module.exports = {
             'versionDetail' : [ 'login_filter', { 'name' : 'user_app_access' , 'data' : 'canRead'} ],
             'updatePackage' : [ 'login_filter', { 'name' : 'user_app_access' , 'data' : 'canWrite'} ],
             'patchList' : [ 'login_filter', { 'name' : 'user_app_access' , 'data' : 'canRead'} ],
+            'userList' : [ 'login_filter', { 'name' : 'user_app_access' , 'data' : 'canWrite'} ],
             //下载全量包的接口，不用校验权限
             'downloadLatestPackage': []
         },

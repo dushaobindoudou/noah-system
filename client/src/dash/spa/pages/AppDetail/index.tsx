@@ -42,6 +42,7 @@ class AppDetail extends React.Component<RouteComponentProps, IState>{
         this.showPublishPage = this.showPublishPage.bind( this );
         this.showPackageListPage = this.showPackageListPage.bind( this );
         this.showTaskListPage = this.showTaskListPage.bind( this );
+        this.showAppUsersPage = this.showAppUsersPage.bind( this );
     }
 
     componentDidMount(){
@@ -98,6 +99,11 @@ class AppDetail extends React.Component<RouteComponentProps, IState>{
         this.props.history.push(`/dash/tasks/list?appId=${this.appId}`);
     }
 
+    //打开当前APP的有权限的用户列表页
+    showAppUsersPage(){
+        this.props.history.push(`/dash/apps/users?appId=${this.appId}`);
+    }
+
     doUpdateApp(app: IUpdateAppInfo){
         if( this.state.isUpdate ){
             return;
@@ -147,7 +153,8 @@ class AppDetail extends React.Component<RouteComponentProps, IState>{
                 <Button type="primary" onClick={ this.showPublishPage }>发版</Button>
                 <Button type="danger" onClick={ this.showEditModal }>编辑APP信息</Button>
                 <Button onClick={ this.showPackageListPage }>全量包列表</Button>
-                <Button onClick={ this.showTaskListPage }>发版历史任务列表</Button>
+                <Button type="primary" onClick={ this.showTaskListPage }>发版历史任务列表</Button>
+                <Button onClick={ this.showAppUsersPage }>查看关联的用户列表</Button>
             </div>
         );
     }

@@ -22,6 +22,7 @@ import UserManage from './pages/UserManage/index';
 import CreateApp from './pages/CreateApp/CreateApp';
 import {OwnAppList, ReadAppList, WriteAppList} from './pages/AppList/AppList';
 import AppDetail from './pages/AppDetail/index';
+import AppUsers from './pages/AppUsers/AppUsers';
 import PublishApp from './pages/PulibshApp/PublishApp';
 import TaskList from './pages/TaskList/TaskList';
 import TaskDetail from './pages/TaskDetail/TaskDetail';
@@ -92,6 +93,7 @@ export default class App extends React.Component<any, any> {
                                     <Route path="/dash/apps/write" exact component={WriteAppList}/>
                                     <Route path="/dash/apps/create" exact component={CreateApp}/>
                                     <Route path="/dash/apps/detail" exact component={AppDetail}/>
+                                    <Route path="/dash/apps/users" exact component={AppUsers}/>
                                     <Route path="/dash/apps/publish" exact component={PublishApp}/>
                                     <Route path="/dash/apps/packageList" exact component={PackageList}/>
                                     <Route path="/dash/apps/packageDetail" exact component={PackageDetail}/>
