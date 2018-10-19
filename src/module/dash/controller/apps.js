@@ -10,6 +10,7 @@ const childProcess = require("child_process");
 const fse = require('fs-extra');
 const uuidV4 = require('uuid/v4');
 const moment = require('moment');
+const send = require('koa-send');
 
 const Controller = leek.Controller;
 
@@ -28,27 +29,48 @@ const mysqlConfig = leek.getConfig('mysql');
 
 class AppsController extends Controller{
 
+    //当前用户，拥有的APP列表页
     async ownAction(){
         return this.render('dash/page/index/index.tpl');
     }
 
+    //当前用户，读权限的APP列表页
     async readAction(){
         return this.render('dash/page/index/index.tpl');
     }
 
+    //当前用户，写权限的APP列表页
     async writeAction(){
         return this.render('dash/page/index/index.tpl');
     }
 
+    //创建APP页面
     async createAction(){
         return this.render('dash/page/index/index.tpl');
     }
 
+    //APP详情页
     async detailAction(){
         return this.render('dash/page/index/index.tpl');
     }
 
+    //app发版页
     async publishAction(){
+        return this.render('dash/page/index/index.tpl');
+    }
+
+    //全量包列表页
+    async packageListAction(){
+        return this.render('dash/page/index/index.tpl');
+    }
+
+    //全量包详情页
+    async packageDetailAction(){
+        return this.render('dash/page/index/index.tpl');
+    }
+
+    //增量包列表页
+    async patchesAction(){
         return this.render('dash/page/index/index.tpl');
     }
 
@@ -470,6 +492,375 @@ class AppsController extends Controller{
         this.ok({
             taskId : taskId
         });
+    }
+
+    //获取某个APP的RN版本列表
+    async versionListAction(){
+
+        const ctx = this.ctx;
+        const query = ctx.query;
+
+        //native版本号
+        let appVersion = query.appVersion;
+        //筛选发版的用户名
+        let publishUserName = ( query.publishUserName || '').trim();
+        //限制发版的时间范围 (start, end )
+        let startTimestamp = parseInt(query.startTimestamp, 10);
+        let endTimestamp = parseInt(query.endTimestamp, 10);
+
+        const app = ctx.state.app;
+        const appId = app.id;
+
+        const User = ctx.app.model.User;
+        const Package = ctx.app.model.Package;
+
+        let targetUser = null;
+        if( publishUserName ){
+            //根据用户名，查找对应用户
+            try{
+                targetUser = await User.findByName(publishUserName);
+            }catch(err){
+                targetUser = null;
+                this.log.error(`[dash.apps.versionListAction]根据用户名查找用户异常！  userName[${publishUserName}]  错误信息：${err.message}`);
+            }
+            if( ! targetUser ){
+                return this.error(`未找到对应的用户`);
+            }
+        }
+
+        let sql = `SELECT * FROM ${Package.TABLE_NAME} WHERE appId = ? `;
+        let values = [ appId ];
+
+        if( appVersion ){
+            sql += ` AND appVersion = ? `;
+            values.push( appVersion );
+        }
+
+        if( targetUser ){
+            sql += ` AND userId = ? `;
+            values.push( targetUser.id );
+        }
+
+        if( ! isNaN(startTimestamp) ){
+            sql += ` AND UNIX_TIMESTAMP(createdAt) > ? `;
+            values.push( Math.floor( startTimestamp / 1000) );
+        }
+
+        if( ! isNaN(endTimestamp) ){
+            sql += ` AND UNIX_TIMESTAMP(createdAt) < ? `;
+            values.push( Math.floor( endTimestamp / 1000) );
+        }
+
+        //按照发版时间，倒序
+        sql += ` ORDER BY createdAt DESC`;
+
+        let list = [];
+
+        try{
+            let temp = await Package.query(sql, values);
+            list = temp.results || [];
+        }catch(err){
+            list = [];
+            http.log.error(`[dash.apps.versionListAction]查找APP版本列表异常！  appId[${app.id}] userName[${publishUserName}]  错误信息：${err.message}`);
+        }
+
+        //获取版本对应的发版人
+        try{
+            let ids = list.map( (obj) => {
+                return obj.userId;
+            });
+            if( ids.length > 0 ){
+                ids = ids.filter( (id, index, arr) => {
+                    return arr.indexOf(id) === index;
+                });
+                let users = await User.findByIdList(ids);
+                let userMap = {};
+                users.forEach( (user) => {
+                    let obj = user.toJSON();
+                    userMap[user.id] = obj;
+                });
+
+                list.forEach( (obj) => {
+                    obj.publisher = userMap[obj.userId];
+                });
+            }
+
+        }catch(err){
+            this.log.error(`[dash.apps.versionListAction]查找各个版本对应的发版用户异常！  appId[${app.id}] userName[${publishUserName}]  错误信息：${err.message}`);
+        }
+
+        this.ok({
+            app,
+            list,
+        });
+    }
+
+    //获取某个RN全量版本的详情
+    //必须传  appId，因为权限判定是用 appId 来判断的
+    //可以根据 packageId 查询；也可以根据 appVersion+packageVersion查询
+    async versionDetailAction(){
+
+        const ctx = this.ctx;
+        //全量包在数据库表中的自增ID
+        const packageId = ctx.query.packageId;
+        const appVersion = ctx.query.appVersion;
+        const packageVersion = ctx.query.packageVersion;
+
+        const app = ctx.state.app;
+
+        const Package = ctx.app.model.Package;
+
+        let rnPackage = null;
+
+        if( packageId ){
+            //通过 packageId 查询详情
+            try{
+                rnPackage = await Package.findByPackageId(packageId);
+            }catch(err){
+                rnPackage = null;
+                this.log.error(`[dash.apps.versionDetailAction]根据packageId获取全量包记录异常！ packageId[${packageId}]  错误信息： ${err.message}`);
+            }
+        }else if( appVersion && packageVersion){
+            //通过 appVersion  packageVersion 查询详情
+            try{
+                rnPackage = await Package.findByAppPackageVersion(appVersion, packageVersion);
+            }catch(err){
+                rnPackage = null;
+                this.log.error(`[dash.apps.versionDetailAction]根据appVersin/packageVersion获取全量包记录异常！ appVersion[${appVersion}] packageVersion[${packageVersion}]  错误信息： ${err.message}`);
+            }
+        }
+
+        if( ! rnPackage ){
+            return this.error(`未找到对应的全量包`);
+        }
+
+        if( rnPackage.appId !== app.id ){
+            //用户构造非法的 appId，尝试读取没有权限的全量包记录！
+            return this.error(`全量包不属于该APP`);
+        }
+
+        const User = ctx.app.model.User;
+
+        //获取发版人信息
+        try{
+            let publisher = await User.findById(rnPackage.userId);
+            rnPackage.publisher = publisher;
+        }catch(err){
+            this.log.error(`[dash.apps.versionDetailAction]根据user_id获取全量包的发版人信息异常！ packageId[${packageId}] userId[${rnPackage.userId}]  错误信息： ${err.message}`);
+        }
+
+        const Task = ctx.app.model.Task;
+        //获取本次版本对应的任务信息
+        try{
+            let task = await Task.findByPackageId(rnPackage.id);
+            rnPackage.task = task;
+        }catch(err){
+            this.log.error(`[dash.apps.versionDetailAction]根据package_id获取全量包的任务信息异常！ packageId[${packageId}] userId[${rnPackage.userId}]  错误信息： ${err.message}`);
+        }
+
+        this.ok({
+            app: app,
+            package : rnPackage
+        });
+    }
+
+    /**
+     * 允许用户更新某个全量包的  status  abTest disablePatch forceUpdate 字段！
+     * 属于危险操作，因此，需要额外校验用户的 登录密码
+     * @returns {Promise.<void>}
+     */
+    async updatePackageAction(){
+        const ctx = this.ctx;
+
+        const User = ctx.app.model.User;
+        const Package = ctx.app.model.Package;
+
+        const user = ctx.user;
+        const app = ctx.state.app;
+
+        const body = ctx.request.body;
+        const packageId = body.packageId;
+        const password = body.password;
+        const status = parseInt(body.status, 10);
+        const abTest = body.abTest || '';
+        const disablePatch = parseInt(body.disablePatch, 10);
+        const forceUpdate = parseInt(body.forceUpdate, 10);
+
+        let dangerUser = null;
+
+        try{
+            dangerUser = await User.findByNamePassword(user.name, password);
+        }catch(err){
+            this.log.warn(`[App.updatePackage]查找匹配用户异常 userName[${user.name}] password[${password}]: ${err.message}`);
+            dangerUser = null;
+        }
+
+        if( ! dangerUser ){
+            return this.error(`密码错误`);
+        }
+
+        let rnPackage = null;
+
+        try{
+            rnPackage = await Package.findByPackageId(packageId);
+        }catch(err){
+            rnPackage = null;
+            this.log.error(`[dash.apps.updatePackageAction]根据packageId获取全量包记录异常！ packageId[${packageId}]  错误信息： ${err.message}`);
+        }
+
+        if( ! rnPackage ){
+            return this.error(`未找到对应的全量包`);
+        }
+
+        if( rnPackage.appId !== app.id ){
+            //用户构造非法的 appId，尝试读取没有权限的全量包记录！
+            return this.error(`全量包不属于该APP`);
+        }
+
+        if( ! Package.isStatusValid(status) ){
+            return this.error(`status值非法！`);
+        }
+
+        if( ! Package.isPatchStatusValid(disablePatch)){
+            return this.error(`disablePatch值非法！`);
+        }
+
+        if( ! Package.isForceUpdateValid(forceUpdate) ){
+            return this.error(`forceUpdate值非法！`);
+        }
+
+        if( status === rnPackage.status 
+            && abTest === rnPackage.abTest 
+            && disablePatch === rnPackage.disablePatch 
+            && forceUpdate === rnPackage.forceUpdate ){
+            //用户未做修改，直接返回
+            return this.error(`没有改动，无需保存`);
+        }
+
+        let success = false;
+        let msg = '';
+        try{
+            success = await rnPackage.update({
+                status: status,
+                abTest: abTest,
+                disablePatch: disablePatch,
+                forceUpdate: forceUpdate
+            });
+        }catch(err){
+            this.log.error(`[dash.apps.updatePackageAction]更新package全量包记录异常！ packageId[${packageId}]  错误信息： ${err.message}`);
+            success = false;
+            msg = err.message;
+        }
+
+        if( success ){
+            this.log.info(`[dash.apps.updatePackageAction]更新package全量包记录成功！appId[${app.id}] user[${user.name}] packageId[${packageId}]  修改后status[${status}] 修改后ab_test[${abTest}]  `);
+            this.ok({
+                fullPackage: rnPackage
+            });
+        }else{
+            this.error(msg || `更新全量包异常`);
+        }
+
+    }
+
+    //某个APP下，某个RN版本的增量包列表
+    async patchListAction(){
+        const ctx = this.ctx;
+        //全量包在数据库表中的自增ID
+        const packageId = ctx.query.packageId;
+
+        if( ! packageId ){
+            return this.error(`packageId不能为空`);
+        }
+
+        const app = ctx.state.app;
+
+        const Package = ctx.app.model.Package;
+        const Patch = ctx.app.model.Patch;
+
+        let rnPackage = null;
+
+        try{
+            rnPackage = await Package.findByPackageId(packageId);
+        }catch(err){
+            rnPackage = null;
+            this.log.error(`[dash.apps.patchListAction]根据packageId获取全量包记录异常！ packageId[${packageId}]  错误信息： ${err.message}`);
+        }
+
+        if( ! rnPackage ){
+            return this.error(`未找到对应的全量包`);
+        }
+
+        let list = [];
+
+        try{
+            list = await Patch.findByAppId(app.id, {
+                where : {
+                    packageId : packageId
+                },
+                orders : [ [ 'compareVersion', 'desc'] ]
+            });
+        }catch(err){
+            this.log.error(`[dash.apps.patchListAction]读取增量包列表异常！ appId[${app.id}] packageId[${packageId}]  错误信息：${err.message}`);
+            list = [];
+        }
+
+        this.ok({
+            app: app,
+            fullPackage: rnPackage,
+            patchList: list,
+        });
+    }
+
+    /**
+     * 下载某个APP下，某个native版本的最新的全量包
+     */
+    async downloadLatestPackageAction(){
+        const ctx = this.ctx;
+        const query = ctx.query;
+        const appKey = query.appKey;
+        const appVersion = query.appVersion;
+
+        const App = ctx.app.model.App;
+        const Package = ctx.app.model.Package;
+
+        let app = null;
+        try{
+            app = await App.findByAppKey(appKey);
+        }catch(err){
+            this.log.error(`[dash.apps.downloadLatestPackageAction]查找app详情异常 appId[${app.id}] 错误信息: ${err.message}`);
+        }
+
+        if( ! app ){
+            ctx.status = 404;
+            ctx.body = `appKey对应的APP不存在`;
+            return;
+        }
+
+        let fullPackage = null;
+        try{
+            fullPackage = await Package.findLatest(app.id, appVersion);
+        }catch(err){
+            this.log.error(`[dash.apps.downloadLatestPackageAction]查找app的某个native对应最新的全量包异常 appId[${app.id}] appVersion[${appVersion}] 错误信息: ${err.message}`);
+        }
+
+        if( ! fullPackage ){
+            ctx.status = 404;
+            ctx.body = `未找到对应的全量包`;
+            return;
+        }
+
+        ctx.set('x-package-md5', fullPackage.md5);
+
+        try{
+            await send(ctx, fullPackage.filePath, {
+                root: '/'
+            });
+        }catch(err){
+            this.log.error(`[dash.apps.downloadLatestPackageAction]输出全量包文件异常 ！ filePath[${fullPackage.filePath}] 错误信息： ${err.message}`);
+            ctx.status = 500;
+            ctx.body = `输出文件流失败`;
+        }
     }
 
 }

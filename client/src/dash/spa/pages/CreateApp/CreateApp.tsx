@@ -104,7 +104,7 @@ export default class CreateApp extends React.Component<any, IState>{
                 //TODO 跳转到应用详情页
                 
                 message.success('创建应用成功');
-                return;
+                return Promise.resolve();
             }
             return Promise.reject( new Error(data.message));
         })

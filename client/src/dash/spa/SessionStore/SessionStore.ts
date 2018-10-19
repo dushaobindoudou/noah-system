@@ -83,7 +83,7 @@ export default class SessionStore {
     }
 
     get isAdmin(): boolean{
-        return this.user && this.user.isAdmin;
+        return !!this.user && this.user.isAdmin;
     }
 
     get isReady(): boolean{

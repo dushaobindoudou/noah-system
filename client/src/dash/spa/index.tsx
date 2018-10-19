@@ -24,6 +24,9 @@ import {OwnAppList, ReadAppList, WriteAppList} from './pages/AppList/AppList';
 import AppDetail from './pages/AppDetail/index';
 import PublishApp from './pages/PulibshApp/PublishApp';
 import TaskDetail from './pages/TaskDetail/TaskDetail';
+import PackageList from './pages/PackageList/PackageList';
+import PackageDetail from './pages/PackageDetail/PackageDetail';
+import PatchList from './pages/PatchList/PatchList';
 
 
 const {Header, Content, Sider} = Layout;
@@ -63,7 +66,7 @@ export default class App extends React.Component<any, any> {
             );
         }
 
-        const user = sessionStore.user;
+        const user = sessionStore.user!;
         const name = user.name;
         return (
             <Provider sessionStore={sessionStore}>
@@ -89,7 +92,11 @@ export default class App extends React.Component<any, any> {
                                     <Route path="/dash/apps/create" exact component={CreateApp}/>
                                     <Route path="/dash/apps/detail" exact component={AppDetail}/>
                                     <Route path="/dash/apps/publish" exact component={PublishApp}/>
+                                    <Route path="/dash/apps/packageList" exact component={PackageList}/>
+                                    <Route path="/dash/apps/packageDetail" exact component={PackageDetail}/>
+                                    <Route path="/dash/apps/patches" exact component={PatchList}/>
                                     <Route path="/dash/tasks/detail" exact component={TaskDetail}/>
+                                
                                 </Content>
                             </Layout>
                         </Layout>

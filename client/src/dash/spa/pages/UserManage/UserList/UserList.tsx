@@ -70,7 +70,11 @@ export default class UserList extends React.Component<IUserListProps>{
     render(){
         return (
             <div>
-                <Table dataSource={this.props.list} columns={this.columns} />
+                <Table 
+                bordered
+                rowKey="id"
+                dataSource={this.props.list} 
+                columns={this.columns} />
             </div>
         );
     }

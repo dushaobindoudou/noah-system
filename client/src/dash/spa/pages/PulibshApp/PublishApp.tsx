@@ -121,13 +121,13 @@ export default class PublishApp extends React.Component<RouteComponentProps, ISt
         this.setState({
             isRequest: true
         });
-        const app = this.state.app;
+        const app = this.state.app!;
         const data = {
-            appVersion: this.gitAppVersionRef.current.input.value,
+            appVersion: this.gitAppVersionRef.current!.input.value,
             appId: app.id,
-            branchName: this.gitBranchRef.current.input.value,
-            desc: this.gitDescRef.current.value,
-            abTest: this.gitAbtestRef.current.value,
+            branchName: this.gitBranchRef.current!.input.value,
+            desc: this.gitDescRef.current!.value,
+            abTest: this.gitAbtestRef.current!.value,
         };
         this.doPublish(data);
     }
@@ -140,7 +140,7 @@ export default class PublishApp extends React.Component<RouteComponentProps, ISt
             });
             message.success('任务提交成功，正在发布中...');
             //跳转到任务详情页
-            this.props.history.push(`/dash/tasks/detail?appId=${this.state.app.id}&taskId=${taskId}`);
+            this.props.history.push(`/dash/tasks/detail?appId=${this.state.app!.id}&taskId=${taskId}`);
         })
         .catch( (err) => {
             this.setState({
