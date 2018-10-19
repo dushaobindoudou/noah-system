@@ -10,6 +10,12 @@ const Controller = leek.Controller;
 
 class TasksController extends Controller{
 
+    //任务列表页
+    async listAction(){
+        return this.render('dash/page/index/index.tpl');
+    }
+
+    //任务详情页
     async detailAction(){
         return this.render('dash/page/index/index.tpl');
     }
@@ -88,6 +94,76 @@ class TasksController extends Controller{
             this.log.error(`[User.taskLog]读取日志文件流异常1 ！ 错误信息： ${err.message}`);
             this.error(`读取日志文件异常`);
         }
+    }
+
+    /**
+     * 获取某个APP下的所有任务记录
+     * @returns {Promise.<void>}
+     */
+    async taskListAction(){
+        const ctx = this.ctx;
+        const args = ctx.query;
+
+        const appId = args.appId;
+
+        const User = ctx.app.model.User;
+        const Task = ctx.app.model.Task;
+
+        const user = ctx.user;
+        const app = ctx.state.app;
+
+        let list = [];
+
+        try{
+            list = await Task.findByAppId(app.id, {
+                orders : [ [ 'id', 'desc'] ]
+            });
+        }catch(err){
+            this.log.error(`[dash.apps.taskListAction]获取APP的所有任务记录异常！ appId[${app.id}]  错误信息： ${err.message}`);
+            return this.error(`获取任务列表失败！`);
+        }
+
+        //获取每次任务对应的用户信息
+        list = list.map( (obj) => {
+            return User.findById(obj.userId).then( (user) => {
+                if( user ){
+                    obj.user = user.toJSON();
+                }
+                return obj;
+            }).catch( () => {
+                return obj;
+            }).then( (data) => {
+                return {
+                    id : data.id,
+                    appId: data.appId,
+                    userId: data.userId,
+                    branchName : data.branchName,
+                    appVersion: data.appVersion,
+                    packageId: data.packageId,
+                    uploadFullPackagePath: data.uploadFullPackagePath,
+                    uploadFullPackageMd5: data.uploadFullPackageMd5,
+                    status : data.status,
+                    abTest: data.abTest,
+                    desc: data.desc,
+                    logFile: data.logFile,
+                    publisher : data.user,
+                    createdAt : data.createdAt,
+                    updatedAt : data.updatedAt
+                };
+            });
+        });
+
+        try{
+            list = await Promise.all( list );
+        }catch(err){
+            this.log.error(`[dash.apps.taskListAction]获取APP的所有任务记录对应的操作用户异常！ appId[${app.id}]  错误信息： ${err.message}`);
+            return this.error(`获取任务列表中的用户信息失败！`);
+        }
+
+        this.ok({
+            app,
+            list,
+        });
     }
 }
 

@@ -23,6 +23,7 @@ import CreateApp from './pages/CreateApp/CreateApp';
 import {OwnAppList, ReadAppList, WriteAppList} from './pages/AppList/AppList';
 import AppDetail from './pages/AppDetail/index';
 import PublishApp from './pages/PulibshApp/PublishApp';
+import TaskList from './pages/TaskList/TaskList';
 import TaskDetail from './pages/TaskDetail/TaskDetail';
 import PackageList from './pages/PackageList/PackageList';
 import PackageDetail from './pages/PackageDetail/PackageDetail';
@@ -95,6 +96,7 @@ export default class App extends React.Component<any, any> {
                                     <Route path="/dash/apps/packageList" exact component={PackageList}/>
                                     <Route path="/dash/apps/packageDetail" exact component={PackageDetail}/>
                                     <Route path="/dash/apps/patches" exact component={PatchList}/>
+                                    <Route path="/dash/tasks/list" exact component={TaskList}/>
                                     <Route path="/dash/tasks/detail" exact component={TaskDetail}/>
                                 
                                 </Content>

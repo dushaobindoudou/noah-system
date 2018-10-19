@@ -41,6 +41,7 @@ class AppDetail extends React.Component<RouteComponentProps, IState>{
         this.cancelUpdate = this.cancelUpdate.bind( this );
         this.showPublishPage = this.showPublishPage.bind( this );
         this.showPackageListPage = this.showPackageListPage.bind( this );
+        this.showTaskListPage = this.showTaskListPage.bind( this );
     }
 
     componentDidMount(){
@@ -92,6 +93,11 @@ class AppDetail extends React.Component<RouteComponentProps, IState>{
         this.props.history.push(`/dash/apps/packageList?appId=${this.appId}`);
     }
 
+    //打开当前APP的发版任务列表页
+    showTaskListPage(){
+        this.props.history.push(`/dash/tasks/list?appId=${this.appId}`);
+    }
+
     doUpdateApp(app: IUpdateAppInfo){
         if( this.state.isUpdate ){
             return;
@@ -141,6 +147,7 @@ class AppDetail extends React.Component<RouteComponentProps, IState>{
                 <Button type="primary" onClick={ this.showPublishPage }>发版</Button>
                 <Button type="danger" onClick={ this.showEditModal }>编辑APP信息</Button>
                 <Button onClick={ this.showPackageListPage }>全量包列表</Button>
+                <Button onClick={ this.showTaskListPage }>发版历史任务列表</Button>
             </div>
         );
     }

@@ -18,7 +18,6 @@ module.exports = {
             '*': [ 'login_filter'],
             'appDetail' : [ 'login_filter', { 'name' : 'user_app_access' , 'data' : 'canRead'} ],
             'publishApp' : [ 'login_filter', { 'name' : 'user_app_access' , 'data' : 'canWrite'} ],
-            'taskList' : [ 'login_filter', { 'name' : 'user_app_access' , 'data' : 'canRead'} ],
             'versionList' : [ 'login_filter', { 'name' : 'user_app_access' , 'data' : 'canRead'} ],
             'versionDetail' : [ 'login_filter', { 'name' : 'user_app_access' , 'data' : 'canRead'} ],
             'updatePackage' : [ 'login_filter', { 'name' : 'user_app_access' , 'data' : 'canWrite'} ],
@@ -28,6 +27,7 @@ module.exports = {
         },
         tasks: {
             '*': [ 'login_filter'],
+            'taskList' : [ 'login_filter', { 'name' : 'user_app_access' , 'data' : 'canRead'} ],
             'taskDetail' : [ 'login_filter', { 'name' : 'user_app_access' , 'data' : 'canRead'}, 'task_fetch' ],
             'taskLog' : [ 'login_filter', { 'name' : 'user_app_access' , 'data' : 'canRead'}, 'task_fetch' ],
         }
