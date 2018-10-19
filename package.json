@@ -6,7 +6,8 @@
   "scripts": {
     "start": "npm run dev",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": " NODE_ENV=development DEBUG=leek-* nodemon --watch src src/index.js"
+    "dev": " NODE_ENV=development DEBUG=leek-* nodemon --watch src src/index.js",
+    "prod": "sh tools/server_control.sh reload production"
   },
   "repository": {
     "type": "git",
