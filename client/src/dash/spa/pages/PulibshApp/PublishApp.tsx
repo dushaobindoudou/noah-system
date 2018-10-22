@@ -6,12 +6,12 @@ import * as React from 'react';
 import * as qs from 'qs';
 import {withRouter, RouteComponentProps} from 'react-router';
 import { Spin, Button, Tabs, Form, Input, message } from 'antd';
-
+// import * as clipboard from 'clipboard-polyfill';
+const clipboard = require('clipboard-polyfill');
 import { getAppDetail, publishApp } from 'dash/spa/service/app';
 import { IExistApp } from 'dash/spa/interface/app';
 
 import './PublishApp.scss';
-import Axios from 'axios';
 
 interface IState{
     isLoad: boolean;
@@ -55,6 +55,7 @@ export default class PublishApp extends React.Component<RouteComponentProps, ISt
             app: null
         };
 
+        this.readInfoFromClipboard = this.readInfoFromClipboard.bind( this );
         this.savePublishType = this.savePublishType.bind( this );
         this.doGitPublish = this.doGitPublish.bind( this );
     }
@@ -82,6 +83,9 @@ export default class PublishApp extends React.Component<RouteComponentProps, ISt
         }
 
         this.refreshAppDetail();
+
+        //默认尝试自动写入 abTest desc
+        this.readInfoFromClipboard();
     }
 
     refreshAppDetail(){
@@ -111,6 +115,29 @@ export default class PublishApp extends React.Component<RouteComponentProps, ISt
         }catch(err){
             console.error(err);
         }
+    }
+
+    //读取剪贴板的发版配置，写入 abTest  desc
+    readInfoFromClipboard(){
+        clipboard.readText()
+        .then( (text: string) => {
+            if( text ){
+                try{
+                    let obj = JSON.parse(text);
+                    if( obj && obj.hasOwnProperty('abTest') && obj.hasOwnProperty('desc') ){
+                        this.gitAbtestRef.current && (this.gitAbtestRef.current.value = obj.abTest);
+                        this.gitDescRef.current && (this.gitDescRef.current.value = obj.desc);
+                        this.uploadAbtestRef.current && (this.uploadAbtestRef.current.value = obj.abTest);
+                        this.uploadDescRef.current && (this.uploadDescRef.current.value = obj.desc);
+                    }
+                }catch(err){
+                    console.warn(err);
+                }
+            }
+        })
+        .catch( (err: Error) => {
+            message.error(`读取剪贴板失败`);
+        });
     }
 
     doGitPublish(e: React.FormEvent){
@@ -241,6 +268,9 @@ export default class PublishApp extends React.Component<RouteComponentProps, ISt
                 <h1>APP发版</h1>
                 { loading }
                 { this.getAppInfoDom() }
+                <div>
+                    <Button onClick={ this.readInfoFromClipboard } icon="snippets" type="primary">粘贴发版配置</Button>
+                </div>
                 { this.getPublishTabDom() }
             </div>
         );

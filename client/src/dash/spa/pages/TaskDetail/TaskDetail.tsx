@@ -9,6 +9,8 @@ import { Spin, Button, message } from 'antd';
 import { IExistTask, TaskStatus, TaskStatusText } from 'dash/spa/interface/task';
 import { getTaskDetail } from 'dash/spa/service/task';
 import { IExistApp } from 'dash/spa/interface/app';
+// import * as clipboard from 'clipboard-polyfill';
+const clipboard = require('clipboard-polyfill');
 
 interface IState{
     isLoad: boolean;
@@ -39,6 +41,7 @@ class TaskDetail extends React.Component<RouteComponentProps, IState>{
         this.showAppDetail = this.showAppDetail.bind( this );
         this.showTaskLog = this.showTaskLog.bind( this );
         this.showRelateVersionDetail = this.showRelateVersionDetail.bind( this );
+        this.copyInfo = this.copyInfo.bind( this );
     }
 
     componentDidMount(){
@@ -128,6 +131,24 @@ class TaskDetail extends React.Component<RouteComponentProps, IState>{
 
     }
 
+    //拷贝  abTest、desc 字段，方便发版使用
+    copyInfo(){
+        const task = this.state.task;
+        if( ! task ){
+            return message.error(`没有任务详情数据`);
+        }
+        
+        const str = JSON.stringify({
+            abTest: task.abTest,
+            desc: task.desc,
+        });
+        clipboard.writeText(str).then( () => {
+            message.success('已拷贝 ABTest/desc 信息')
+          }).catch( () => {
+            message.error('拷贝失败！');
+          });
+    }
+
     getInfoDom(){
         const { isLoad, task } = this.state;
         if( isLoad ){
@@ -145,6 +166,7 @@ class TaskDetail extends React.Component<RouteComponentProps, IState>{
                     <Button onClick={this.showTaskLog}>查看日志</Button>
                     <Button type="primary" onClick={this.showRelateVersionDetail}>查看版本详情</Button>
                     <Button onClick={this.showAppDetail}>查看应用详情</Button>
+                    <Button icon="copy" onClick={ this.copyInfo } type="primary">拷贝发版配置</Button>
                 </div>
                 <div className="taskDetailInfoWrap">
                     <dl className="taskInfoItem">
