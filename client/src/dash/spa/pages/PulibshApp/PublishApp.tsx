@@ -58,6 +58,7 @@ export default class PublishApp extends React.Component<RouteComponentProps, ISt
         this.readInfoFromClipboard = this.readInfoFromClipboard.bind( this );
         this.savePublishType = this.savePublishType.bind( this );
         this.doGitPublish = this.doGitPublish.bind( this );
+        this.doUploadPublish = this.doUploadPublish.bind( this );
     }
 
     componentDidMount(){
@@ -140,6 +141,7 @@ export default class PublishApp extends React.Component<RouteComponentProps, ISt
         });
     }
 
+    //通过 git 在服务端拉取代码方式发版
     doGitPublish(e: React.FormEvent){
         e.preventDefault();
         if( this.state.isRequest ){
@@ -155,6 +157,27 @@ export default class PublishApp extends React.Component<RouteComponentProps, ISt
             branchName: this.gitBranchRef.current!.input.value,
             desc: this.gitDescRef.current!.value,
             abTest: this.gitAbtestRef.current!.value,
+        };
+        this.doPublish(data);
+    }
+
+    //通过上传全量包方式发版
+    doUploadPublish(e: React.FormEvent){
+        e.preventDefault();
+        if( this.state.isRequest ){
+            return;
+        }
+        this.setState({
+            isRequest: true
+        });
+        const app = this.state.app!;
+        const data = {
+            appVersion: this.uploadAppVersionRef.current!.input.value,
+            appId: app.id,
+            uploadFullPackagePath: this.uploadPathRef.current!.input.value,
+            uploadFullPackageMd5: this.uploadMd5Ref.current!.input.value,
+            desc: this.uploadDescRef.current!.value,
+            abTest: this.uploadAbtestRef.current!.value,
         };
         this.doPublish(data);
     }
@@ -239,7 +262,46 @@ export default class PublishApp extends React.Component<RouteComponentProps, ISt
     getUploadPublishDom(){
         return (
             <div>
-
+                <h2>通过上传全量包发版</h2>
+                <Form onSubmit={this.doUploadPublish}>
+                    <FormItem label="APP版本号(native版本号)">
+                        <Input
+                            placeholder="输入该RN适用的native版本号"
+                            type="text"
+                            defaultValue=""
+                            ref={this.uploadAppVersionRef}
+                        />
+                    </FormItem>
+                    <FormItem label="上传的全量包绝对路径">
+                        <Input
+                            type="text"
+                            defaultValue=""
+                            ref={this.uploadPathRef}
+                        />
+                    </FormItem>
+                    <FormItem label="上传的全量包md5">
+                        <Input
+                            type="text"
+                            defaultValue=""
+                            ref={this.uploadMd5Ref}
+                        />
+                    </FormItem>
+                    <FormItem label="ABTest配置">
+                        <textarea
+                            defaultValue=""
+                            ref={this.uploadAbtestRef}
+                        />
+                    </FormItem>
+                    <FormItem label="发版描述信息">
+                        <textarea
+                            defaultValue=""
+                            ref={this.uploadDescRef}
+                        />
+                    </FormItem>
+                    <FormItem>
+                        <Button type="danger" htmlType="submit">确认发布</Button>
+                    </FormItem>
+                </Form>
             </div>
         );
     }
