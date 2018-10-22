@@ -9,7 +9,9 @@ module.exports = {
             '*': [ 'login_filter' ]
         },
         passport: {
-            'index': [ 'session_user']
+            'index': [ 'session_user'],
+            'passwordManage': [ 'login_filter' ],
+            'modifyPassword': [ 'login_filter' ],
         },
         user: {
             '*': [ 'admin_filter']

@@ -22,6 +22,12 @@ class PassportIndexController extends Controller{
 
         return this.render('dash/page/login/index.tpl')
     }
+
+    //修改密码页面
+    async passwordManageAction(){
+        return this.render('dash/page/index/index.tpl');
+    }
+
     //退出登录
     async outAction(){
         const {ctx} = this;
@@ -65,59 +71,36 @@ class PassportIndexController extends Controller{
             this.error('用户不存在');
         }
     }
-   
-    async modifyAction(){
-        return this.render('passport/page/modify/modify.tpl')
-    }
 
+    /**
+     * 用户修改自己的登录密码
+     */
     async modifyPasswordAction(){
         const {ctx} = this;
         const body = ctx.request.body;
 
-        await ctx.initUser();
-        const user = ctx.user || {};
+        const user = ctx.user;
         let {name,id} = user;
 
         let {oldPassword,newPassword} = body;
 
+        if( ! user.isPasswordCorrect(oldPassword) ){
+            //校验当前密码错误
+            return this.error(`密码错误`);
+        }
+
         this.log.info(`用户 ${name} 用户id ${id} 修改密码 `);
         const salt = bcrypt.genSaltSync(10);
         newPassword = bcrypt.hashSync(newPassword, salt);
-        if(name){
-            let result = await ctx.callService('user.findOne',name);
-            //查询当前用户是否成功
-            if(result){
-                let dbPassword = result.password || '';
+        
+        user.pwd = newPassword;
 
-                let validate = bcrypt.compareSync(oldPassword, dbPassword);
+        const success = await user.save();
 
-                //密码是否正确
-                if(validate){
-
-                    let modifyResult = await ctx.callService('user.updateUser',name, newPassword, updatedAt, id);
-                    if(modifyResult && modifyResult.affectedRows == 1){
-                        ctx.body = {
-                            message : '成功',
-                            status : 0
-                        }
-                    }else{
-                        ctx.body = {
-                            message : '密码修改失败',
-                            status : -1
-                        }
-                    }
-                }else{
-                    ctx.body = {
-                        message : '用户输入原密码不正确',
-                        status : -1
-                    }
-                }
-            }
+        if( success ){
+            this.ok({});
         }else{
-            ctx.body = {
-                message : '请用户重新登录',
-                status : -1
-            }
+            this.error(`修改密码异常`);
         }
 
     }
