@@ -142,3 +142,18 @@ export function getAppUsers(appId: number): Promise<IAppUserListResult>{
         return Promise.reject( new Error(data.message));
     });
 }
+
+/**
+ * 修改某个APP下，某个用户的权限
+ * @param data 
+ */
+export function updateUserAccess(data: any): Promise<void>{
+    return axios.post(`/dash/apps/updateUser`, data)
+    .then( ({data}): any => {
+        if( data.status === 0 ){
+            
+        }else{
+            return Promise.reject( new Error(data.message));
+        }
+    });
+}

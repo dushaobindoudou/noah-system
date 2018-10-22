@@ -444,6 +444,71 @@ class AppsController extends Controller{
     }
 
     /**
+     * 某个app，给某个用户添加权限，可以是 ： 无权限、读、写
+     * @returns {Promise.<void>}
+     */
+    async updateUserAction(){
+        const ctx = this.ctx;
+        const App = ctx.app.model.App;
+        const body = ctx.request.body;
+
+        const userName = ( body.userName || '' ).trim();
+        const access = body.access;
+
+        if(! userName || ! access ){
+            return this.error('userName/access不能为空！');
+        }
+
+        const app = ctx.state.app;
+        const user = ctx.user;
+
+        const appId = app.id;
+
+        const UserApp = ctx.app.model.UserApp;
+
+        const User = ctx.app.model.User;
+
+        let targetUser = null;
+        try{
+            targetUser = await User.findByName(userName);
+        }catch(err){
+            this.log.error(`[dash.apps.updateUserAction]查找目标用户异常 appId[${appId}] userName[${userName}] 错误信息：${err.message}`);
+        }
+
+        if( ! targetUser ){
+            return this.error(`未找到对应的用户`);
+        }
+
+        let userApp = await UserApp.findByUserIdAndAppId(targetUser.id, app.id);
+        if( ! userApp ){
+            userApp = new UserApp({
+                userId : targetUser.id,
+                appId : app.id
+            });
+        }
+
+        //更新权限
+        userApp.setAccess(access);
+
+        let success = false;
+
+        try{
+            success = await userApp.save();
+        }catch(err){
+            success = false;
+            this.log.error(`[dash.apps.updateUserAction]保存权限异常 appId[${appId}] userName[${userName}] 错误信息：${err.message}`);
+        }
+
+        if( success ){
+            this.log.info(`[dash.apps.updateUserAction]用户修改APP的权限信息  appId[${appId}] user[${user.name}] targetUser[${targetUser.name}] 修改后的权限是[${access}]`);
+            this.ok({});
+        }else{
+            this.error(`保存权限异常`);
+        }
+
+    }
+
+    /**
      * APP发版
      * @returns {Promise.<void>}
      */

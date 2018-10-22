@@ -8,13 +8,28 @@ import {withRouter, RouteComponentProps, Route} from 'react-router';
 import { Spin, Button, message, Modal, Form, Input, Select, Table, Card, DatePicker } from 'antd';
 import * as moment from 'moment';
 import { IAppUser, AppUserAccess, AppUserAccessText, IExistApp } from 'dash/spa/interface/app';
-import { getAppUsers } from 'dash/spa/service/app';
+import { getAppUsers, updateUserAccess } from 'dash/spa/service/app';
+
+interface IUserAccessSimple{
+    //是否新创建的权限
+    isNew: boolean;
+    userName: string;
+    access: AppUserAccess;
+}
 
 interface IState{
     isLoad: boolean;
     app: IExistApp | null;
     users: IAppUser[];
+    //是否正在更新某个用户权限
+    isUpdating: boolean;
+    //编辑弹窗是否可见
+    editorVisible: boolean;
+    editorData: IUserAccessSimple;
 }
+
+const FormItem = Form.Item;
+const Option = Select.Option;
 
 class AppUsers extends React.Component<RouteComponentProps, IState>{
 
@@ -27,8 +42,20 @@ class AppUsers extends React.Component<RouteComponentProps, IState>{
         this.state = {
             isLoad: true,
             app: null,
-            users: []
+            users: [],
+            isUpdating: false,
+            editorVisible: false,
+            editorData: {
+                isNew: true,
+                userName: '',
+                access: AppUserAccess.NO
+            }
         };
+
+        this.updateEditorUserName = this.updateEditorUserName.bind( this );
+        this.updateEditorAccess = this.updateEditorAccess.bind( this );
+        this.doUpdateAccess = this.doUpdateAccess.bind( this );
+        this.closeEditor = this.closeEditor.bind( this );
 
         this.columns = [
             {
@@ -45,6 +72,7 @@ class AppUsers extends React.Component<RouteComponentProps, IState>{
             },
             {
                 title: '权限',
+                dataIndex: 'access',
                 key: 'access',
                 render(access: AppUserAccess, row: IAppUser){
                     return AppUserAccessText[access];
@@ -66,7 +94,15 @@ class AppUsers extends React.Component<RouteComponentProps, IState>{
                     return moment(updatedAt).format('YYYY-MM-DD HH:mm:ss');
                 }
             },
-            
+            {
+                title: '操作',
+                key: 'op',
+                render: (_: any, row: IAppUser) => {
+                    return (
+                        <Button type="danger" onClick={ this.showEditor.bind(this, row)}>修改权限</Button>
+                    );
+                }
+            }
         ];
     }
 
@@ -109,17 +145,139 @@ class AppUsers extends React.Component<RouteComponentProps, IState>{
         });
     }
 
+    closeEditor(){
+        this.setState({
+            editorVisible: false,
+            editorData: {
+                isNew: true,
+                userName: '',
+                access: AppUserAccess.NO
+            }
+        });
+    }
+
+    showEditor(data?: IAppUser){
+        const isNew = ! data;
+        const userName = data ? data.name : '';
+        const access = data ? data.access : AppUserAccess.NO;
+        const editorData = {
+            isNew,
+            userName: userName,
+            access: access
+        }
+        
+        this.setState({
+            editorVisible: true,
+            editorData: editorData
+        });
+    }
+
+    updateEditorUserName(e: React.ChangeEvent<HTMLInputElement>){
+        this.setState({
+            editorData: {
+                ... this.state.editorData,
+                userName: e.target.value
+            }
+        });
+    }
+
+    updateEditorAccess(v: AppUserAccess){
+        this.setState({
+            editorData: {
+                ... this.state.editorData,
+                access: v
+            }
+        });
+    }
+
+    //提交用户权限修改
+    doUpdateAccess(){
+        if( this.state.isUpdating ){
+            return;
+        }
+        const editorData = this.state.editorData;
+        if( ! editorData.userName ){
+            message.error('用户名不能为空');
+            return;
+        }
+        this.setState({
+            isUpdating: true
+        });
+        updateUserAccess({
+            appId: this.appId, 
+            userName: editorData.userName, 
+            access: editorData.access
+        }).then( () => {
+            //修改成功
+            this.setState({
+                isUpdating: false,
+                editorVisible: false,
+                editorData: {
+                    isNew: true,
+                    userName: '',
+                    access: AppUserAccess.NO,
+                }
+            });
+            message.success(`修改权限成功`);
+            this.fetchUserList();
+        })
+        .catch( (err) => {
+            this.setState({
+                isUpdating: false
+            });
+            message.error(err.message);
+        });
+    }
+
+    getEditorModal(){
+
+        const { editorData } = this.state;
+
+        return (
+            <Modal title={ editorData.isNew ? '新增权限' : '修改权限'}
+                width="700px"
+                visible={ this.state.editorVisible }
+                onOk={ this.doUpdateAccess}
+                onCancel={ this.closeEditor }
+                destroyOnClose={true}
+                okText="确定修改"
+                cancelText="取消">
+                <Form onSubmit={this.doUpdateAccess}>
+                    <FormItem label="用户名">
+                        <Input
+                            type="text"
+                            disabled={ ! editorData.isNew }
+                            value={ editorData.userName }
+                            onChange={ this.updateEditorUserName }
+                        />
+                    </FormItem>
+                    <FormItem label="权限">
+                        <Select defaultValue={editorData.access} style={{ width: 220 }} onChange={ this.updateEditorAccess } >
+                            <Option value={ AppUserAccess.NO}>{ AppUserAccessText[AppUserAccess.NO] }</Option>
+                            <Option value={ AppUserAccess.READ}>{ AppUserAccessText[AppUserAccess.READ] }</Option>
+                            <Option value={ AppUserAccess.WRITE}>{ AppUserAccessText[AppUserAccess.WRITE] }</Option>
+                        </Select>
+                    </FormItem>
+                </Form>
+            </Modal>
+        );
+    }
+
     render(){
         return (
             <div>
                 <h1>APP关联的用户</h1>
                 <Spin size="large" spinning={this.state.isLoad}>
+                    <div>
+                        <Button type="primary" onClick={ () => { this.showEditor(); } }>新增用户权限</Button>
+                    </div>
                     <Table 
                         bordered
                         rowKey="id"
                         dataSource={this.state.users} 
                         columns={this.columns} />
                 </Spin>
+                { this.getEditorModal() }
             </div>
         );
     }
