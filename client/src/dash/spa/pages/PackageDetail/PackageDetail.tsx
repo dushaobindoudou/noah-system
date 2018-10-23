@@ -6,6 +6,8 @@ import * as React from 'react';
 import * as qs from 'qs';
 import {withRouter, RouteComponentProps, Route} from 'react-router';
 import { Spin, Button, message, Modal, Form, Input, Select } from 'antd';
+// import * as clipboard from 'clipboard-polyfill';
+const clipboard = require('clipboard-polyfill');
 import { IPackage, IExistApp, PackageStatusMap, PackageForceUpdateText, PackageDisablePatchText, PackageStatus, PackageForceUpdate, PackageDisablePatch } from 'dash/spa/interface/app';
 import { getPackageDetail, updatePackage } from 'dash/spa/service/app';
 
@@ -65,6 +67,7 @@ class PackageDetail extends React.Component<RouteComponentProps, IState>{
         this.showTaskDetail = this.showTaskDetail.bind( this );
         this.showPatchList = this.showPatchList.bind( this );
         this.showPackageListPage = this.showPackageListPage.bind( this );
+        this.copyInfo = this.copyInfo.bind( this );
         this.doUpdatePackage = this.doUpdatePackage.bind( this );
         this.showEditor = this.showEditor.bind( this );
         this.closeEditor = this.closeEditor.bind( this );
@@ -140,6 +143,24 @@ class PackageDetail extends React.Component<RouteComponentProps, IState>{
     //打开当前APP的全量包列表页
     showPackageListPage(){
         this.props.history.push(`/dash/apps/packageList?appId=${this.state.app!.id}`);
+    }
+
+    //拷贝  abTest、desc 字段，方便发版使用
+    copyInfo(){
+        const fullPackage = this.state.fullPackage;
+        if( ! fullPackage ){
+            return message.error(`没有全量包数据`);
+        }
+        
+        const str = JSON.stringify({
+            abTest: fullPackage.abTest,
+            desc: fullPackage.desc,
+        });
+        clipboard.writeText(str).then( () => {
+            message.success('已拷贝 ABTest/desc 信息')
+          }).catch( () => {
+            message.error('拷贝失败！');
+          });
     }
 
     doUpdatePackage(){
@@ -256,6 +277,7 @@ class PackageDetail extends React.Component<RouteComponentProps, IState>{
                     <Button onClick={ this.showPatchList }>查看增量包列表</Button>
                     <Button onClick={ this.showEditor } type="danger">修改版本状态</Button>
                     <Button onClick={ this.showPackageListPage }>全量包列表</Button>
+                    <Button icon="copy" onClick={ this.copyInfo } type="primary">拷贝发版配置</Button>
                 </div>
                 <div>
                     <dl className="packageInfoItem">

@@ -105,3 +105,27 @@ export interface IPatch{
     createdAt: string;
     updatedAt: string;
 }
+
+//用户和APP的权限
+export enum AppUserAccess{
+    //没有权限
+    NO=1,
+    //读权限
+    READ=2,
+    //写权限
+    WRITE=3
+};
+
+//各种权限对应文案
+export const AppUserAccessText = {
+    [AppUserAccess.NO]: `[${AppUserAccess.NO}]无权限`,
+    [AppUserAccess.READ]: `[${AppUserAccess.READ}]只读`,
+    [AppUserAccess.WRITE]: `[${AppUserAccess.WRITE}]写权限`
+};
+
+//APP对应用户权限列表中，每个用户的数据结构
+export interface IAppUser extends IUser{
+    canRead: boolean;
+    canWrite: boolean;
+    access: AppUserAccess;
+}
