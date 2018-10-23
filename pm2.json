@@ -2,7 +2,7 @@
     "apps" : [
         {
             "name"        : "noah-system",
-            "script"      : "index.js",
+            "script"      : "src/index.js",
             "args"        : [],
             "node_args"   : "--harmony",
             "merge_logs"  : true,
