@@ -20,7 +20,7 @@ build_module(){
     local module_name=$1
     cd ${client_dir}
     echo "开始编译模块 ${module_name} "
-    npm run build -- -m ${module_name} --env production
+    leek bundle -m ${module_name} --env production
 }
 
 # yarn 安装
@@ -63,7 +63,7 @@ YarnInstall
 cd ${client_dir}
 
 # 处理server端代码
-npm run build -- -m server
+leek server build
 
 cd ${system_dir}
 
