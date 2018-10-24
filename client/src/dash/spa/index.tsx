@@ -22,8 +22,14 @@ import UserManage from './pages/UserManage/index';
 import CreateApp from './pages/CreateApp/CreateApp';
 import {OwnAppList, ReadAppList, WriteAppList} from './pages/AppList/AppList';
 import AppDetail from './pages/AppDetail/index';
+import AppUsers from './pages/AppUsers/AppUsers';
 import PublishApp from './pages/PulibshApp/PublishApp';
+import TaskList from './pages/TaskList/TaskList';
 import TaskDetail from './pages/TaskDetail/TaskDetail';
+import PackageList from './pages/PackageList/PackageList';
+import PackageDetail from './pages/PackageDetail/PackageDetail';
+import PatchList from './pages/PatchList/PatchList';
+import PasswordManage from './pages/PasswordManage/PasswordManage';
 
 
 const {Header, Content, Sider} = Layout;
@@ -38,11 +44,18 @@ export default class App extends React.Component<any, any> {
     constructor(props: any){
         super(props);
 
-        this.sessionStore = new SessionStore();        
+        this.sessionStore = new SessionStore();     
+        
+        this.showPasswordManage = this.showPasswordManage.bind( this );
     }
 
     componentDidMount(){
         this.sessionStore.init();
+    }
+
+    //跳转到修改密码页面
+    showPasswordManage(){
+        history.push(`/dash/passport/passwordManage`);
     }
 
     render() {
@@ -63,7 +76,7 @@ export default class App extends React.Component<any, any> {
             );
         }
 
-        const user = sessionStore.user;
+        const user = sessionStore.user!;
         const name = user.name;
         return (
             <Provider sessionStore={sessionStore}>
@@ -74,8 +87,8 @@ export default class App extends React.Component<any, any> {
                                 <a className="logo" href="/">Noah System</a>
                                 <div className="header-right-box">
                                     <span className="user-name">登录用户：{name}</span>
-                                    <Button style={{marginRight: '10px'}} href="/passport/index/modify">修改密码</Button>
-                                    <Button type="danger" href="/passport/index/out">退出</Button>
+                                    <Button onClick={ this.showPasswordManage } style={{marginRight: '10px'}}>修改密码</Button>
+                                    <Button type="danger" href="/dash/passport/out">退出</Button>
                                 </div>
                             </Header>
                             <Layout style={{flex: 1}}>
@@ -88,8 +101,14 @@ export default class App extends React.Component<any, any> {
                                     <Route path="/dash/apps/write" exact component={WriteAppList}/>
                                     <Route path="/dash/apps/create" exact component={CreateApp}/>
                                     <Route path="/dash/apps/detail" exact component={AppDetail}/>
+                                    <Route path="/dash/apps/users" exact component={AppUsers}/>
                                     <Route path="/dash/apps/publish" exact component={PublishApp}/>
+                                    <Route path="/dash/apps/packageList" exact component={PackageList}/>
+                                    <Route path="/dash/apps/packageDetail" exact component={PackageDetail}/>
+                                    <Route path="/dash/apps/patches" exact component={PatchList}/>
+                                    <Route path="/dash/tasks/list" exact component={TaskList}/>
                                     <Route path="/dash/tasks/detail" exact component={TaskDetail}/>
+                                    <Route path="/dash/passport/passwordManage" exact component={ PasswordManage }/>
                                 </Content>
                             </Layout>
                         </Layout>

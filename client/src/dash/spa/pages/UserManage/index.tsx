@@ -64,6 +64,9 @@ export default class UserManage extends React.Component<IUserManageProps, IUserM
     }
 
     componentDidMount(){
+
+        document.title = '用户管理';
+
         this.refreshList();
     }
 
@@ -79,7 +82,7 @@ export default class UserManage extends React.Component<IUserManageProps, IUserM
                     isLoad: false,
                     users: out.data || []
                 });
-                return;
+                return Promise.resolve();
             }
             return Promise.reject(new Error(out.message));
 
@@ -129,7 +132,7 @@ export default class UserManage extends React.Component<IUserManageProps, IUserM
                 //刷新列表
                 this.refreshList();
                 message.success('创建用户成功');
-                return;
+                return Promise.resolve();
             }
             return Promise.reject(new Error(out.message));
 
@@ -212,11 +215,14 @@ export default class UserManage extends React.Component<IUserManageProps, IUserM
         this.setState({
             isLoad: true
         });
+
+        const editUser = this.state.editUser!;
+
         axios.post('/dash/user/update',{
-            userId: this.state.editUser.id,
-            name: this.state.editUser.name,
-            password: this.state.editUser.pwd,
-            status: this.state.editUser.status,
+            userId: editUser.id,
+            name: editUser.name,
+            password: editUser.pwd,
+            status: editUser.status,
         }).then((res)=>{
             const out = res.data || {};
             if( out.status === 0 ){
@@ -227,7 +233,7 @@ export default class UserManage extends React.Component<IUserManageProps, IUserM
                 //刷新列表
                 this.refreshList();
                 message.success('编辑用户成功');
-                return;
+                return Promise.resolve();
             }
             return Promise.reject(new Error(out.message));
 
@@ -256,27 +262,27 @@ export default class UserManage extends React.Component<IUserManageProps, IUserM
                    okText="确定修改"
                    cancelText="取消">
                 <Form onSubmit={this.doUpdateUser}>
-                        <FormItem label="用户名">
-                            <Input
-                                type="text"
-                                value={ editUser.name }
-                                onChange={this.updateEditUserName}
-                            />
-                        </FormItem>
-                        <FormItem label="密码">
-                            <Input
-                                type="text"
-                                value={ editUser.pwd}
-                                onChange={this.updateEditUserPwd}
-                            />
-                        </FormItem>
-                        <FormItem label="是否启用账号">
-                            <Select defaultValue={editUser.status} style={{ width: 120 }} onSelect={this.updateEditUserStatus}>
-                                <Option value={User.STATUS_OK}>正常</Option>
-                                <Option value={User.STATUS_DISABLE}>禁用</Option>
-                            </Select>
-                        </FormItem>
-                    </Form>
+                    <FormItem label="用户名">
+                        <Input
+                            type="text"
+                            value={ editUser.name }
+                            onChange={this.updateEditUserName}
+                        />
+                    </FormItem>
+                    <FormItem label="密码">
+                        <Input
+                            type="text"
+                            value={ editUser.pwd}
+                            onChange={this.updateEditUserPwd}
+                        />
+                    </FormItem>
+                    <FormItem label="是否启用账号">
+                        <Select defaultValue={editUser.status} style={{ width: 120 }} onSelect={this.updateEditUserStatus}>
+                            <Option value={User.STATUS_OK}>正常</Option>
+                            <Option value={User.STATUS_DISABLE}>禁用</Option>
+                        </Select>
+                    </FormItem>
+                </Form>
             </Modal>
         );
     }

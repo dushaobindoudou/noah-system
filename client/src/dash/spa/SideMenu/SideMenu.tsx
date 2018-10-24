@@ -47,7 +47,7 @@ class SideBar extends React.Component<ISideMenuProps, any> {
 
         const {location} = this.props;
         const sessionStore = this.sessionStore;
-        const user = sessionStore.user;
+        const user = sessionStore.user!;
         let userMenu = null;
         let editPrizeMenu = null;
         //如果当前用户是管理员的话就显示 用户管理模块

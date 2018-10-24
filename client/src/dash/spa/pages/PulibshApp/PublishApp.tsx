@@ -6,12 +6,12 @@ import * as React from 'react';
 import * as qs from 'qs';
 import {withRouter, RouteComponentProps} from 'react-router';
 import { Spin, Button, Tabs, Form, Input, message } from 'antd';
-
+// import * as clipboard from 'clipboard-polyfill';
+const clipboard = require('clipboard-polyfill');
 import { getAppDetail, publishApp } from 'dash/spa/service/app';
 import { IExistApp } from 'dash/spa/interface/app';
 
 import './PublishApp.scss';
-import Axios from 'axios';
 
 interface IState{
     isLoad: boolean;
@@ -55,11 +55,16 @@ export default class PublishApp extends React.Component<RouteComponentProps, ISt
             app: null
         };
 
+        this.readInfoFromClipboard = this.readInfoFromClipboard.bind( this );
         this.savePublishType = this.savePublishType.bind( this );
         this.doGitPublish = this.doGitPublish.bind( this );
+        this.doUploadPublish = this.doUploadPublish.bind( this );
     }
 
     componentDidMount(){
+
+        document.title = 'APP发版';
+
         const searchConf = qs.parse(location.search.substring(1));
         this.appId = parseInt(searchConf.appId, 10);
         if( isNaN(this.appId)){
@@ -82,6 +87,9 @@ export default class PublishApp extends React.Component<RouteComponentProps, ISt
         }
 
         this.refreshAppDetail();
+
+        //默认尝试自动写入 abTest desc
+        this.readInfoFromClipboard();
     }
 
     refreshAppDetail(){
@@ -113,6 +121,30 @@ export default class PublishApp extends React.Component<RouteComponentProps, ISt
         }
     }
 
+    //读取剪贴板的发版配置，写入 abTest  desc
+    readInfoFromClipboard(){
+        clipboard.readText()
+        .then( (text: string) => {
+            if( text ){
+                try{
+                    let obj = JSON.parse(text);
+                    if( obj && obj.hasOwnProperty('abTest') && obj.hasOwnProperty('desc') ){
+                        this.gitAbtestRef.current && (this.gitAbtestRef.current.value = obj.abTest);
+                        this.gitDescRef.current && (this.gitDescRef.current.value = obj.desc);
+                        this.uploadAbtestRef.current && (this.uploadAbtestRef.current.value = obj.abTest);
+                        this.uploadDescRef.current && (this.uploadDescRef.current.value = obj.desc);
+                    }
+                }catch(err){
+                    console.warn(err);
+                }
+            }
+        })
+        .catch( (err: Error) => {
+            message.error(`读取剪贴板失败`);
+        });
+    }
+
+    //通过 git 在服务端拉取代码方式发版
     doGitPublish(e: React.FormEvent){
         e.preventDefault();
         if( this.state.isRequest ){
@@ -121,13 +153,34 @@ export default class PublishApp extends React.Component<RouteComponentProps, ISt
         this.setState({
             isRequest: true
         });
-        const app = this.state.app;
+        const app = this.state.app!;
         const data = {
-            appVersion: this.gitAppVersionRef.current.input.value,
+            appVersion: this.gitAppVersionRef.current!.input.value,
             appId: app.id,
-            branchName: this.gitBranchRef.current.input.value,
-            desc: this.gitDescRef.current.value,
-            abTest: this.gitAbtestRef.current.value,
+            branchName: this.gitBranchRef.current!.input.value,
+            desc: this.gitDescRef.current!.value,
+            abTest: this.gitAbtestRef.current!.value,
+        };
+        this.doPublish(data);
+    }
+
+    //通过上传全量包方式发版
+    doUploadPublish(e: React.FormEvent){
+        e.preventDefault();
+        if( this.state.isRequest ){
+            return;
+        }
+        this.setState({
+            isRequest: true
+        });
+        const app = this.state.app!;
+        const data = {
+            appVersion: this.uploadAppVersionRef.current!.input.value,
+            appId: app.id,
+            uploadFullPackagePath: this.uploadPathRef.current!.input.value,
+            uploadFullPackageMd5: this.uploadMd5Ref.current!.input.value,
+            desc: this.uploadDescRef.current!.value,
+            abTest: this.uploadAbtestRef.current!.value,
         };
         this.doPublish(data);
     }
@@ -140,7 +193,7 @@ export default class PublishApp extends React.Component<RouteComponentProps, ISt
             });
             message.success('任务提交成功，正在发布中...');
             //跳转到任务详情页
-            this.props.history.push(`/dash/tasks/detail?appId=${this.state.app.id}&taskId=${taskId}`);
+            this.props.history.push(`/dash/tasks/detail?appId=${this.state.app!.id}&taskId=${taskId}`);
         })
         .catch( (err) => {
             this.setState({
@@ -212,7 +265,46 @@ export default class PublishApp extends React.Component<RouteComponentProps, ISt
     getUploadPublishDom(){
         return (
             <div>
-
+                <h2>通过上传全量包发版</h2>
+                <Form onSubmit={this.doUploadPublish}>
+                    <FormItem label="APP版本号(native版本号)">
+                        <Input
+                            placeholder="输入该RN适用的native版本号"
+                            type="text"
+                            defaultValue=""
+                            ref={this.uploadAppVersionRef}
+                        />
+                    </FormItem>
+                    <FormItem label="上传的全量包绝对路径">
+                        <Input
+                            type="text"
+                            defaultValue=""
+                            ref={this.uploadPathRef}
+                        />
+                    </FormItem>
+                    <FormItem label="上传的全量包md5">
+                        <Input
+                            type="text"
+                            defaultValue=""
+                            ref={this.uploadMd5Ref}
+                        />
+                    </FormItem>
+                    <FormItem label="ABTest配置">
+                        <textarea
+                            defaultValue=""
+                            ref={this.uploadAbtestRef}
+                        />
+                    </FormItem>
+                    <FormItem label="发版描述信息">
+                        <textarea
+                            defaultValue=""
+                            ref={this.uploadDescRef}
+                        />
+                    </FormItem>
+                    <FormItem>
+                        <Button type="danger" htmlType="submit">确认发布</Button>
+                    </FormItem>
+                </Form>
             </div>
         );
     }
@@ -241,6 +333,9 @@ export default class PublishApp extends React.Component<RouteComponentProps, ISt
                 <h1>APP发版</h1>
                 { loading }
                 { this.getAppInfoDom() }
+                <div>
+                    <Button onClick={ this.readInfoFromClipboard } icon="snippets" type="primary">粘贴发版配置</Button>
+                </div>
                 { this.getPublishTabDom() }
             </div>
         );
