@@ -24,7 +24,7 @@ echo "创建应用日志目录"
 mkdir -p /usr/app/noah-log
 
 echo "拷贝编译后的代码到运行目录"
-cp -r "${dist_dir}/*" ${run_dir}
+cp -r ${dist_dir}/* ${run_dir}
 
 echo "进入运行根目录"
 # cd ${run_dir}
