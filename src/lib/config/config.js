@@ -104,7 +104,7 @@ config.view = {
 
         nunjucks: {
 
-            rootDir: path.normalize(`${leek.appRoot}/views`),
+            rootDir: path.normalize(`${leek.appRoot}/dist/views`),
             tags: {
                 blockStart: '{%',
                 blockEnd: '%}',
