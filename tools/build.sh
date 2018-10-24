@@ -20,7 +20,7 @@ build_module(){
     local module_name=$1
     cd ${client_dir}
     echo "开始编译模块 ${module_name} "
-    npm run build -- -m ${module_name} --env production
+    leek bundle -m ${module_name} --env production
 }
 
 # yarn 安装
@@ -63,7 +63,7 @@ YarnInstall
 cd ${client_dir}
 
 # 处理server端代码
-npm run build -- -m server
+leek server build
 
 cd ${system_dir}
 
@@ -74,6 +74,3 @@ cp ./pm2.json ${dist_dir}
 #  拷贝 tools 目录到dist中
 cp -r "${system_dir}/tools" ${dist_dir}
 
-# tar czf ${tar_name} ${dist_dir}
-
-# echo "打包 ${dist_dir_name} 上线包 ${tar_name} 完成"
