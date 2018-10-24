@@ -11,7 +11,7 @@ run_dir="/usr/app/leekserver"
 # 调用编译脚本
 cd ${system_dir}
 echo "调用 build.sh"
-sh "${base_dir}/build.sh"
+bash "${base_dir}/build.sh"
 
 cd ${system_dir}
 
