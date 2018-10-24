@@ -30,7 +30,8 @@ echo "进入运行根目录"
 cd ${run_dir}
 
 echo "准备重启服务"
-sh tools/server_control.sh reload production
+pm2-runtime reload pm2.json --env production
+
 
 
 
