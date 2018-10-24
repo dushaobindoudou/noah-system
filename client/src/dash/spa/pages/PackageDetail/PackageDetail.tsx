@@ -80,6 +80,9 @@ class PackageDetail extends React.Component<RouteComponentProps, IState>{
     }
 
     componentDidMount(){
+
+        document.title = '全量包详情';
+
         const searchConf = qs.parse(location.search.substring(1));
         this.appId = parseInt(searchConf.appId, 10);
         this.packagId = parseInt(searchConf.packageId, 10);

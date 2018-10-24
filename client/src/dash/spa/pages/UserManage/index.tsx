@@ -64,6 +64,9 @@ export default class UserManage extends React.Component<IUserManageProps, IUserM
     }
 
     componentDidMount(){
+
+        document.title = '用户管理';
+
         this.refreshList();
     }
 

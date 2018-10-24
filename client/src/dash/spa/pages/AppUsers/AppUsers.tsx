@@ -107,6 +107,9 @@ class AppUsers extends React.Component<RouteComponentProps, IState>{
     }
 
     componentDidMount(){
+
+        document.title = 'APP用户权限管理';
+
         const searchConf = qs.parse(location.search.substring(1));
 
         this.appId = parseInt(searchConf.appId, 10);

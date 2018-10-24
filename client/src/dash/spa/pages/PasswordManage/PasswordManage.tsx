@@ -31,6 +31,10 @@ class PasswordManage extends React.Component<any, IState>{
         this.updatePassword = this.updatePassword.bind( this );
     }
 
+    componentDidMount(){
+        document.title = '修改密码';
+    }
+
     updatePassword(e: React.FormEvent){
         e.preventDefault();
 

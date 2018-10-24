@@ -62,6 +62,9 @@ export default class PublishApp extends React.Component<RouteComponentProps, ISt
     }
 
     componentDidMount(){
+
+        document.title = 'APP发版';
+
         const searchConf = qs.parse(location.search.substring(1));
         this.appId = parseInt(searchConf.appId, 10);
         if( isNaN(this.appId)){

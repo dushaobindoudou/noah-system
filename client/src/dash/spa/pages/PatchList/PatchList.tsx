@@ -100,6 +100,9 @@ class PatchList extends React.Component<RouteComponentProps, IState>{
     }
 
     componentDidMount(){
+
+        document.title = '增量包列表';
+
         const searchConf = qs.parse(location.search.substring(1));
         this.appId = parseInt(searchConf.appId, 10);
         this.packagId = parseInt(searchConf.packageId, 10);

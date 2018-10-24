@@ -95,6 +95,9 @@ class TaskList extends React.Component<RouteComponentProps, IState>{
     }
 
     componentDidMount(){
+
+        document.title = '任务历史列表';
+
         const searchConf = qs.parse(location.search.substring(1));
 
         this.appId = parseInt(searchConf.appId, 10);

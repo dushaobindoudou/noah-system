@@ -45,6 +45,9 @@ class TaskDetail extends React.Component<RouteComponentProps, IState>{
     }
 
     componentDidMount(){
+
+        document.title = '发版任务详情';
+
         const searchConf = qs.parse(location.search.substring(1));
         this.appId = parseInt(searchConf.appId, 10);
         this.taskId = parseInt(searchConf.taskId, 10);
