@@ -27,10 +27,10 @@ echo "拷贝编译后的代码到运行目录"
 cp -r "${dist_dir}/*" ${run_dir}
 
 echo "进入运行根目录"
-cd ${run_dir}
+# cd ${run_dir}
 
 echo "准备重启服务"
-pm2-runtime reload pm2.json --env production
+# pm2-runtime reload pm2.json --env production
 
 
 
