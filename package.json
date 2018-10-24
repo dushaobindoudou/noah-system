@@ -7,10 +7,16 @@
     "start": "npm run dev",
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": " NODE_ENV=development DEBUG=leek-* nodemon --watch src src/index.js",
+<<<<<<< HEAD
     "prod": "sh tools/server_control.sh reload production",
     "build": "sh tools/build.sh",
     "mysql:init": "sh tools/db_init.sh",
     "docker:deploy": "sh tools/docker_deploy.sh"
+=======
+    "prod": "bash tools/server_control.sh reload production",
+    "build": "bash tools/build.sh",
+    "mysql:init": "bash tools/db_init.sh"
+>>>>>>> aa9ede170ef1b23d0eb7290c3b8bdbd64721a6a2
   },
   "repository": {
     "type": "git",

@@ -8,6 +8,10 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 CREATE DATABASE noah_system;
+<<<<<<< HEAD
+=======
+
+>>>>>>> aa9ede170ef1b23d0eb7290c3b8bdbd64721a6a2
 USE noah_system;
 
 # Dump of table tb_app
